@@ -55,24 +55,24 @@ pm.envManager = {
         $('#environment-list').append(Handlebars.templates.environment_list({"items":this.environments}));
 
         $('#environments-list').on("click", ".environment-action-delete", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
             $('a[rel="tooltip"]').tooltip('hide');
-            pm.envManager.deleteEnvironment(id);
+            pm.envManager.deleteEnvironment(itemid);
         });
 
         $('#environments-list').on("click", ".environment-action-edit", function () {
-            var id = $(this).attr('data-id');
-            pm.envManager.showEditor(id);
+            var itemid = $(this).attr('data-id');
+            pm.envManager.showEditor(itemid);
         });
 
         $('#environments-list').on("click", ".environment-action-duplicate", function () {
-            var id = $(this).attr('data-id');
-            pm.envManager.duplicateEnvironment(id);
+            var itemid = $(this).attr('data-id');
+            pm.envManager.duplicateEnvironment(itemid);
         });
 
         $('#environments-list').on("click", ".environment-action-download", function () {
-            var id = $(this).attr('data-id');
-            pm.envManager.downloadEnvironment(id);
+            var itemid = $(this).attr('data-id');
+            pm.envManager.downloadEnvironment(itemid);
         });
 
         $('.environment-action-back').on("click", function () {
@@ -80,10 +80,10 @@ pm.envManager = {
         });
 
         $('#environment-selector').on("click", ".environment-list-item", function () {
-            var id = $(this).attr('data-id');
-            var selectedEnv = pm.envManager.getEnvironmentFromId(id);
+            var itemid = $(this).attr('data-id');
+            var selectedEnv = pm.envManager.getEnvironmentFromId(itemid);
             pm.envManager.selectedEnv = selectedEnv;
-            pm.settings.set("selectedEnvironmentId", selectedEnv.id);
+            pm.settings.set("selectedEnvironmentId", selectedEnv.itemid);
             pm.envManager.quicklook.refreshEnvironment(selectedEnv);
             $('#environment-selector .environment-list-item-selected').html(selectedEnv.name);
         });
@@ -123,8 +123,8 @@ pm.envManager = {
         });
 
         $('.environments-actions-add-submit').on("click", function () {
-            var id = $('#environment-editor-id').val();
-            if (id === "0") {
+            var itemid = $('#environment-editor-id').val();
+            if (itemid === "0") {
                 pm.envManager.addEnvironment();
             }
             else {
@@ -167,12 +167,12 @@ pm.envManager = {
         pm.envManager.quicklook.init();
     },
 
-    getEnvironmentFromId:function (id) {
+    getEnvironmentFromId:function (itemid) {
         var environments = pm.envManager.environments;
         var count = environments.length;
         for (var i = 0; i < count; i++) {
             var env = environments[i];
-            if (id === env.id) {
+            if (itemid === env.itemid) {
                 return env;
             }
         }
@@ -313,11 +313,11 @@ pm.envManager = {
         $('#modal-environments .modal-footer').css("display", "none");
     },
 
-    showEditor:function (id) {
-        if (id) {
-            var environment = pm.envManager.getEnvironmentFromId(id);
+    showEditor:function (itemid) {
+        if (itemid) {
+            var environment = pm.envManager.getEnvironmentFromId(itemid);
             $('#environment-editor-name').val(environment.name);
-            $('#environment-editor-id').val(id);
+            $('#environment-editor-id').val(itemid);
             $('#environment-keyvaleditor').keyvalueeditor('reset', environment.values);
         }
         else {
@@ -352,7 +352,7 @@ pm.envManager = {
         var name = $('#environment-editor-name').val();
         var values = $('#environment-keyvaleditor').keyvalueeditor('getValues');
         var environment = {
-            id:guid(),
+            itemid:guid(),
             name:name,
             values:values,
             timestamp:new Date().getTime()
@@ -365,11 +365,11 @@ pm.envManager = {
     },
 
     updateEnvironment:function () {
-        var id = $('#environment-editor-id').val();
+        var itemid = $('#environment-editor-id').val();
         var name = $('#environment-editor-name').val();
         var values = $('#environment-keyvaleditor').keyvalueeditor('getValues');
         var environment = {
-            id:id,
+            itemid:itemid,
             name:name,
             values:values,
             timestamp:new Date().getTime()
@@ -381,21 +381,21 @@ pm.envManager = {
         });
     },
 
-    deleteEnvironment:function (id) {
-        pm.indexedDB.environments.deleteEnvironment(id, function () {
+    deleteEnvironment:function (itemid) {
+        pm.indexedDB.environments.deleteEnvironment(itemid, function () {
             pm.envManager.getAllEnvironments();
             pm.envManager.showSelector();
         });
     },
 
-    duplicateEnvironment:function (id) {
-        var env = pm.envManager.getEnvironmentFromId(id);
+    duplicateEnvironment:function (itemid) {
+        var env = pm.envManager.getEnvironmentFromId(itemid);
         
         //get a new name for this duplicated environment
         env.name = env.name + " " + "copy";
         
         //change the env guid
-        env.id = guid();
+        env.itemid = guid();
 
         pm.indexedDB.environments.addEnvironment(env, function () {
             //Add confirmation
@@ -408,8 +408,8 @@ pm.envManager = {
         });        
     },
 
-    downloadEnvironment:function (id) {
-        var env = pm.envManager.getEnvironmentFromId(id);
+    downloadEnvironment:function (itemid) {
+        var env = pm.envManager.getEnvironmentFromId(itemid);
         var name = env.name + "-environment.json";
         var type = "application/json";
         var filedata = JSON.stringify(env);

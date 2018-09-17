@@ -18,14 +18,14 @@
  */
 "use strict";
 function Collection() {
-    this.id = "";
+    this.itemid = "";
     this.name = "";
     this.requests = {};
 }
 
 function CollectionRequest() {
     this.collectionId = "";
-    this.id = "";
+    this.itemid = "";
     this.name = "";
     this.description = "";
     this.url = "";
@@ -37,7 +37,7 @@ function CollectionRequest() {
 }
 
 function Request() {
-    this.id = "";
+    this.itemid = "";
     this.name = "";
     this.description = "";
     this.url = "";
@@ -252,7 +252,7 @@ pm.broadcasts = {
                 var b = broadcasts[i];
 
                 var existing = _.find(old_broadcasts, function (br) {
-                    return br.id === b.id;
+                    return br.itemid === b.itemid;
                 });
                 if (!existing) {
                     b["status"] = "unread";
@@ -321,36 +321,36 @@ pm.collections = {
         });
 
         $collection_items.on("click", ".sidebar-collection-head-name", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.toggleRequestList(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.toggleRequestList(itemid);
         });
 
         $collection_items.on("click", ".collection-head-actions .label", function () {
-            var id = $(this).parent().parent().parent().attr('data-id');
-            pm.collections.toggleRequestList(id);
+            var itemid = $(this).parent().parent().parent().attr('data-id');
+            pm.collections.toggleRequestList(itemid);
         });
 
         $collection_items.on("click", ".request-actions-load", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.getCollectionRequest(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.getCollectionRequest(itemid);
         });
 
 
         $collection_items.on("click", ".request-actions-delete", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
 
-            pm.indexedDB.getCollectionRequest(id, function (req) {
-                $('#modal-delete-collection-request-yes').attr('data-id', id);
+            pm.indexedDB.getCollectionRequest(itemid, function (req) {
+                $('#modal-delete-collection-request-yes').attr('data-id', itemid);
                 $('#modal-delete-collection-request-name').html(req.name);
                 $('#modal-delete-collection-request').modal('show');
             });            
         });        
 
         $collection_items.on("click", ".request-actions-edit", function () {
-            var id = $(this).attr('data-id');
-            $('#form-edit-collection-request .collection-request-id').val(id);
+            var itemid = $(this).attr('data-id');
+            $('#form-edit-collection-request .collection-request-id').val(itemid);
 
-            pm.indexedDB.getCollectionRequest(id, function (req) {
+            pm.indexedDB.getCollectionRequest(itemid, function (req) {
                 $('#form-edit-collection-request .collection-request-name').val(req.name);
                 $('#form-edit-collection-request .collection-request-description').val(req.description);
                 $('#modal-edit-collection-request').modal('show');
@@ -358,32 +358,32 @@ pm.collections = {
         });
 
         $collection_items.on("click", ".collection-actions-edit", function () {
-            var id = $(this).attr('data-id');
-            pm.indexedDB.getCollection(id, function (collection) {
-                $('#form-edit-collection .collection-id').val(collection.id);
+            var itemid = $(this).attr('data-id');
+            pm.indexedDB.getCollection(itemid, function (collection) {
+                $('#form-edit-collection .collection-id').val(collection.itemid);
                 $('#form-edit-collection .collection-name').val(collection.name);
                 $('#modal-edit-collection').modal('show');
             });            
         });
 
         $collection_items.on("click", ".collection-actions-delete", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
             var name = $(this).attr('data-name');
 
-            pm.indexedDB.getCollection(id, function (collection) {
-                $('#modal-delete-collection-yes').attr('data-id', id);
+            pm.indexedDB.getCollection(itemid, function (collection) {
+                $('#modal-delete-collection-yes').attr('data-id', itemid);
                 $('#modal-delete-collection-name').html(collection.name);
             });            
         });
 
         $('#modal-delete-collection-yes').on("click", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.deleteCollection(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.deleteCollection(itemid);
         });
 
         $('#modal-delete-collection-request-yes').on("click", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.deleteCollectionRequest(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.deleteCollectionRequest(itemid);
         });
 
         $('#import-collection-url-submit').on("click", function () {
@@ -392,34 +392,34 @@ pm.collections = {
         });
 
         $collection_items.on("click", ".collection-actions-download", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
             $("#modal-share-collection").modal("show");
-            $('#share-collection-get-link').attr("data-collection-id", id);
-            $('#share-collection-download').attr("data-collection-id", id);
+            $('#share-collection-get-link').attr("data-collection-id", itemid);
+            $('#share-collection-download').attr("data-collection-id", itemid);
             $('#share-collection-link').css("display", "none");
         });
 
         $('#share-collection-get-link').on("click", function () {
-            var id = $(this).attr('data-collection-id');
-            pm.collections.uploadCollection(id, function (link) {
+            var itemid = $(this).attr('data-collection-id');
+            pm.collections.uploadCollection(itemid, function (link) {
                 $('#share-collection-link').css("display", "block");
                 $('#share-collection-link').html(link);
             });
         });
 
         $('#share-collection-download').on("click", function () {
-            var id = $(this).attr('data-collection-id');
-            pm.collections.saveCollection(id);
+            var itemid = $(this).attr('data-collection-id');
+            pm.collections.saveCollection(itemid);
         });
 
         $('#request-samples').on("click", ".sample-response-name", function () {
-            var id = $(this).attr("data-id");
-            pm.collections.loadResponseInEditor(id);
+            var itemid = $(this).attr("data-id");
+            pm.collections.loadResponseInEditor(itemid);
         });
 
         $('#request-samples').on("click", ".sample-response-delete", function () {
-            var id = $(this).attr("data-id");
-            pm.collections.removeSampleResponse(id);
+            var itemid = $(this).attr("data-id");
+            pm.collections.removeSampleResponse(itemid);
         });
 
         var dropZone = document.getElementById('import-collection-dropzone');
@@ -444,13 +444,13 @@ pm.collections = {
         });
     },
 
-    getCollectionData:function (id, callback) {
-        pm.indexedDB.getCollection(id, function (data) {
+    getCollectionData:function (itemid, callback) {
+        pm.indexedDB.getCollection(itemid, function (data) {
             var collection = data;
             pm.indexedDB.getAllRequestsInCollection(collection, function (collection, data) {
                 var ids = [];
                 for (var i = 0, count = data.length; i < count; i++) {
-                    ids.push(data[i].id);
+                    ids.push(data[i].itemid);
                 }
 
                 //Get all collection requests with one call
@@ -463,15 +463,15 @@ pm.collections = {
         });
     },
 
-    saveCollection:function (id) {
-        pm.collections.getCollectionData(id, function (name, type, filedata) {
+    saveCollection:function (itemid) {
+        pm.collections.getCollectionData(itemid, function (name, type, filedata) {
             pm.filesystem.saveAndOpenFile(name, filedata, type, function () {
             });
         });
     },
 
-    uploadCollection:function (id, callback) {
-        pm.collections.getCollectionData(id, function (name, type, filedata) {
+    uploadCollection:function (itemid, callback) {
+        pm.collections.getCollectionData(itemid, function (name, type, filedata) {
             var uploadUrl = pm.webUrl + '/collections';
             $.ajax({
                 type:'POST',
@@ -504,7 +504,7 @@ pm.collections = {
 
             for (var i = 0; i < collection.requests.length; i++) {
                 var request = collection.requests[i];
-                request.collectionId = collection.id;
+                request.collectionId = collection.itemid;
 
                   /*Handling rawModeData */
                 if(request.hasOwnProperty("rawModeData")) {
@@ -515,17 +515,17 @@ pm.collections = {
                 var newId = guid();
 
                 if (ordered) {
-                    var currentId = request.id;
+                    var currentId = request.itemid;
                     var loc = _.indexOf(collection["order"], currentId);
                     collection["order"][loc] = newId;
                 }
 
-                request.id = newId;
+                request.itemid = newId;
 
                 if ("responses" in request) {
                     var j, count;
                     for (j = 0, count = request["responses"].length; j < count; j++) {
-                        request["responses"][j].id = guid();
+                        request["responses"][j].itemid = guid();
                         request["responses"][j].collectionRequestId = newId;                        
                     }
                 }
@@ -552,7 +552,7 @@ pm.collections = {
                     // Render thumbnail.
                     var data = e.currentTarget.result;
                     var collection = JSON.parse(data);
-                    collection.id = guid();
+                    collection.itemid = guid();
                     pm.collections.importCollectionData(collection);
                 };
             })(f);
@@ -565,25 +565,25 @@ pm.collections = {
     importCollectionFromUrl:function (url) {
         $.get(url, function (data) {
             var collection = data;
-            collection.id = guid();
+            collection.itemid = guid();
             pm.collections.importCollectionData(collection);
         });
     },
 
-    getCollectionRequest:function (id) {
+    getCollectionRequest:function (itemid) {
         $('.sidebar-collection-request').removeClass('sidebar-collection-request-active');
-        $('#sidebar-request-' + id).addClass('sidebar-collection-request-active');
-        pm.indexedDB.getCollectionRequest(id, function (request) {
+        $('#sidebar-request-' + itemid).addClass('sidebar-collection-request-active');
+        pm.indexedDB.getCollectionRequest(itemid, function (request) {
             pm.request.isFromCollection = true;
-            pm.request.collectionRequestId = id;
+            pm.request.collectionRequestId = itemid;
             pm.request.loadRequestInEditor(request, true);
         });
     },
 
-    loadResponseInEditor:function (id) {
+    loadResponseInEditor:function (itemid) {
         var responses = pm.request.responses;        
         var responseIndex = find(responses, function (item, i, responses) {
-            return item.id === id;
+            return item.itemid === itemid;
         });
 
         var response = responses[responseIndex];
@@ -591,10 +591,10 @@ pm.collections = {
         pm.request.response.render(response);
     },
 
-    removeSampleResponse:function (id) {
+    removeSampleResponse:function (itemid) {
         var responses = pm.request.responses;
         var responseIndex = find(responses, function (item, i, responses) {
-            return item.id === id;
+            return item.itemid === itemid;
         });
 
         var response = responses[responseIndex];
@@ -603,14 +603,14 @@ pm.collections = {
         pm.indexedDB.getCollectionRequest(response.collectionRequestId, function (request) {
             request["responses"] = responses;
             pm.indexedDB.updateCollectionRequest(request, function () {
-                $('#request-samples table tr[data-id="' + response.id + '"]').remove();
+                $('#request-samples table tr[data-id="' + response.itemid + '"]').remove();
             });
 
         });
     },
 
-    openCollection:function (id) {
-        var target = "#collection-requests-" + id;
+    openCollection:function (itemid) {
+        var target = "#collection-requests-" + itemid;
         if ($(target).css("display") === "none") {
             $(target).slideDown(100, function () {
                 pm.layout.refreshScrollPanes();
@@ -618,9 +618,9 @@ pm.collections = {
         }
     },
 
-    toggleRequestList:function (id) {
-        var target = "#collection-requests-" + id;
-        var label = "#collection-" + id + " .collection-head-actions .label";
+    toggleRequestList:function (itemid) {
+        var target = "#collection-requests-" + itemid;
+        var label = "#collection-" + itemid + " .collection-head-actions .label";
         if ($(target).css("display") === "none") {
             $(target).slideDown(100, function () {
                 pm.layout.refreshScrollPanes();
@@ -640,7 +640,7 @@ pm.collections = {
 
         if (newCollection) {
             //Add the new collection and get guid
-            collection.id = guid();
+            collection.itemid = guid();
             collection.name = newCollection;
             pm.indexedDB.addCollection(collection, function (collection) {
                 pm.collections.render(collection);
@@ -655,7 +655,7 @@ pm.collections = {
     updateCollectionFromCurrentRequest:function () {
         var url = $('#url').val();
         var collectionRequest = new CollectionRequest();
-        collectionRequest.id = pm.request.collectionRequestId;
+        collectionRequest.itemid = pm.request.collectionRequestId;
         collectionRequest.headers = pm.request.getPackedHeaders();
         collectionRequest.url = url;
         collectionRequest.method = pm.request.method;
@@ -664,11 +664,11 @@ pm.collections = {
         collectionRequest.version = 2;
         collectionRequest.time = new Date().getTime();
 
-        pm.indexedDB.getCollectionRequest(collectionRequest.id, function (req) {
+        pm.indexedDB.getCollectionRequest(collectionRequest.itemid, function (req) {
             collectionRequest.name = req.name;
             collectionRequest.description = req.description;
             collectionRequest.collectionId = req.collectionId;
-            $('#sidebar-request-' + req.id + " .request .label").removeClass('label-method-' + req.method);
+            $('#sidebar-request-' + req.itemid + " .request .label").removeClass('label-method-' + req.method);
 
             pm.indexedDB.updateCollectionRequest(collectionRequest, function (request) {
                 var requestName;
@@ -678,9 +678,9 @@ pm.collections = {
 
                 requestName = limitStringLineWidth(request.name, 43);
 
-                $('#sidebar-request-' + request.id + " .request .request-name").html(requestName);
-                $('#sidebar-request-' + request.id + " .request .label").html(request.method);
-                $('#sidebar-request-' + request.id + " .request .label").addClass('label-method-' + request.method);
+                $('#sidebar-request-' + request.itemid + " .request .request-name").html(requestName);
+                $('#sidebar-request-' + request.itemid + " .request .label").html(request.method);
+                $('#sidebar-request-' + request.itemid + " .request .label").addClass('label-method-' + request.method);
                 noty(
                     {
                         type:'success',
@@ -709,7 +709,7 @@ pm.collections = {
         var collection = new Collection();
 
         var collectionRequest = new CollectionRequest();
-        collectionRequest.id = guid();
+        collectionRequest.itemid = guid();
         collectionRequest.headers = pm.request.getPackedHeaders();
         collectionRequest.url = url;
         collectionRequest.method = pm.request.method;
@@ -723,12 +723,12 @@ pm.collections = {
 
         if (newCollection) {
             //Add the new collection and get guid
-            collection.id = guid();
+            collection.itemid = guid();
             collection.name = newCollection;
             pm.indexedDB.addCollection(collection, function (collection) {
                 $('#sidebar-section-collections .empty-message').css("display", "none");
                 $('#new-collection').val("");
-                collectionRequest.collectionId = collection.id;
+                collectionRequest.collectionId = collection.itemid;
 
                 $('#select-collection').append(Handlebars.templates.item_collection_selector_list(collection));
                 $('#collection-items').append(Handlebars.templates.item_collection_sidebar_head(collection));
@@ -737,7 +737,7 @@ pm.collections = {
                 pm.layout.refreshScrollPanes();
                 pm.indexedDB.addCollectionRequest(collectionRequest, function (req) {
                     var targetElement = "#collection-requests-" + req.collectionId;
-                    $('#sidebar-request-' + req.id).addClass('sidebar-collection-request-active');
+                    $('#sidebar-request-' + req.itemid).addClass('sidebar-collection-request-active');
                     pm.urlCache.addUrl(req.url);
 
                     if (typeof req.name === "undefined") {
@@ -750,7 +750,7 @@ pm.collections = {
                     pm.layout.refreshScrollPanes();
 
                     pm.request.isFromCollection = true;
-                    pm.request.collectionRequestId = collectionRequest.id;
+                    pm.request.collectionRequestId = collectionRequest.itemid;
                     $('#update-request-in-collection').css("display", "inline-block");
                     pm.collections.openCollection(collectionRequest.collectionId);
                 });
@@ -758,8 +758,8 @@ pm.collections = {
         }
         else {
             //Get guid of existing collection
-            collection.id = existingCollectionId;
-            collectionRequest.collectionId = collection.id;
+            collection.itemid = existingCollectionId;
+            collectionRequest.collectionId = collection.itemid;
             pm.indexedDB.addCollectionRequest(collectionRequest, function (req) {
                 var targetElement = "#collection-requests-" + req.collectionId;
                 pm.urlCache.addUrl(req.url);
@@ -770,19 +770,19 @@ pm.collections = {
                 req.name = limitStringLineWidth(req.name, 43);
 
                 $(targetElement).append(Handlebars.templates.item_collection_sidebar_request(req));
-                $('#sidebar-request-' + req.id).addClass('sidebar-collection-request-active');
+                $('#sidebar-request-' + req.itemid).addClass('sidebar-collection-request-active');
 
                 pm.layout.refreshScrollPanes();
 
                 pm.request.isFromCollection = true;
-                pm.request.collectionRequestId = collectionRequest.id;
+                pm.request.collectionRequestId = collectionRequest.itemid;
                 $('#update-request-in-collection').css("display", "inline-block");
                 pm.collections.openCollection(collectionRequest.collectionId);
 
                 //Update collection's order element    
-                pm.indexedDB.getCollection(collection.id, function(collection) {
+                pm.indexedDB.getCollection(collection.itemid, function(collection) {
                     if("order" in collection) {
-                        collection["order"].push(collectionRequest.id);
+                        collection["order"].push(collectionRequest.itemid);
                         pm.indexedDB.updateCollection(collection, function() {});
                     }
                 });
@@ -828,8 +828,8 @@ pm.collections = {
     },
 
     handleRequestDropOnCollection: function(event, ui) {
-        var id = ui.draggable.context.id;
-        var requestId = $('#' + id + ' .request').attr("data-id");
+        var itemid = ui.draggable.context.itemid;
+        var requestId = $('#' + itemid + ' .request').attr("data-id");
         var targetCollectionId = $($(event.target).find('.sidebar-collection-head-name')[0]).attr('data-id');      
         pm.indexedDB.getCollection(targetCollectionId, function(collection) {            
             pm.indexedDB.getCollectionRequest(requestId, function(collectionRequest) {
@@ -837,7 +837,7 @@ pm.collections = {
 
                 pm.collections.deleteCollectionRequest(requestId);
 
-                collectionRequest.id = guid();
+                collectionRequest.itemid = guid();
                 collectionRequest.collectionId = targetCollectionId;            
 
                 pm.indexedDB.addCollectionRequest(collectionRequest, function (req) {                        
@@ -863,9 +863,9 @@ pm.collections = {
                     });
 
                     //Update collection's order element    
-                    pm.indexedDB.getCollection(collection.id, function(collection) {                        
+                    pm.indexedDB.getCollection(collection.itemid, function(collection) {                        
                         if("order" in collection) {                                                
-                            collection["order"].push(collectionRequest.id);                                                        
+                            collection["order"].push(collectionRequest.itemid);                                                        
                             pm.indexedDB.updateCollection(collection, function() {                                
                             });
                         }
@@ -878,7 +878,7 @@ pm.collections = {
     render:function (collection) {
         $('#sidebar-section-collections .empty-message').css("display", "none");
 
-        var currentEl = $('#collection-' + collection.id);
+        var currentEl = $('#collection-' + collection.itemid);
         if (currentEl) {
             currentEl.remove();
         }
@@ -888,16 +888,16 @@ pm.collections = {
 
         $('a[rel="tooltip"]').tooltip();
 
-        $('#collection-' + collection.id + " .sidebar-collection-head").droppable({
+        $('#collection-' + collection.itemid + " .sidebar-collection-head").droppable({
             accept: ".sidebar-collection-request",
             hoverClass: "ui-state-hover",
             drop: pm.collections.handleRequestDropOnCollection
         });
 
         if ("requests" in collection) {
-            var id = collection.id;
+            var itemid = collection.itemid;
             var requests = collection.requests;
-            var targetElement = "#collection-requests-" + id;
+            var targetElement = "#collection-requests-" + itemid;
             var count = requests.length;
             var requestTargetElement;
 
@@ -911,7 +911,7 @@ pm.collections = {
 
                     
                     //Make requests draggable for moving to a different collection
-                    requestTargetElement = "#sidebar-request-" + requests[i].id;                    
+                    requestTargetElement = "#sidebar-request-" + requests[i].itemid;                    
                     $(requestTargetElement).draggable({});
                 }
 
@@ -924,7 +924,7 @@ pm.collections = {
                         var orderedRequests = [];                    
                         for (var j = 0, len = collection["order"].length; j < len; j++) {
                             var element = _.find(requests, function (request) {
-                                return request.id == collection["order"][j]
+                                return request.itemid == collection["order"][j]
                             });
                             orderedRequests.push(element);
                         }
@@ -941,13 +941,13 @@ pm.collections = {
                         var target_parent = $(event.target).parents(".sidebar-collection-requests");                        
                         var target_parent_collection = $(event.target).parents(".sidebar-collection");                        
                         var collection_id = $(target_parent_collection).attr("data-id");
-                        var ul_id = $(target_parent.context).attr("id");                        
+                        var ul_id = $(target_parent.context).attr("itemid");                        
                         var collection_requests = $(target_parent.context).children("li");
                         var count = collection_requests.length;
                         var order = [];
 
                         for (var i = 0; i < count; i++) {
-                            var li_id = $(collection_requests[i]).attr("id");
+                            var li_id = $(collection_requests[i]).attr("itemid");
                             var request_id = $("#" + li_id + " .request").attr("data-id");
                             order.push(request_id);
                         }
@@ -966,14 +966,14 @@ pm.collections = {
         pm.layout.refreshScrollPanes();
     },
 
-    deleteCollectionRequest:function (id) {
-        pm.indexedDB.getCollectionRequest(id, function(request) {
-            pm.indexedDB.deleteCollectionRequest(id, function () {
-                pm.layout.sidebar.removeRequestFromHistory(id);
+    deleteCollectionRequest:function (itemid) {
+        pm.indexedDB.getCollectionRequest(itemid, function(request) {
+            pm.indexedDB.deleteCollectionRequest(itemid, function () {
+                pm.layout.sidebar.removeRequestFromHistory(itemid);
                 //Update order
                 pm.indexedDB.getCollection(request.collectionId, function (collection) {                            
                     var order = collection["order"];
-                    var index = order.indexOf(id);
+                    var index = order.indexOf(itemid);
                     order.splice(index, 1);
                     collection["order"] = order;
                     pm.indexedDB.updateCollection(collection, function (collection) {                        
@@ -983,18 +983,18 @@ pm.collections = {
         });        
     },
 
-    updateCollectionMeta: function(id, name) {
-        pm.indexedDB.getCollection(id, function (collection) {
+    updateCollectionMeta: function(itemid, name) {
+        pm.indexedDB.getCollection(itemid, function (collection) {
             collection.name = name;
             pm.indexedDB.updateCollection(collection, function (collection) {                    
-                $('#collection-' + collection.id + " .sidebar-collection-head-name").html(collection.name);
-                $('#select-collection option[value="' + collection.id + '"]').html(collection.name);                
+                $('#collection-' + collection.itemid + " .sidebar-collection-head-name").html(collection.name);
+                $('#select-collection option[value="' + collection.itemid + '"]').html(collection.name);                
             });
         });        
     },
 
-    updateCollectionRequestMeta: function(id, name, description) {
-        pm.indexedDB.getCollectionRequest(id, function (req) {
+    updateCollectionRequestMeta: function(itemid, name, description) {
+        pm.indexedDB.getCollectionRequest(itemid, function (req) {
             req.name = name;
             req.description = description;
             pm.indexedDB.updateCollectionRequest(req, function (newRequest) {
@@ -1006,8 +1006,8 @@ pm.collections = {
                     requestName = limitStringLineWidth(req.url, 43);
                 }
 
-                $('#sidebar-request-' + req.id + " .request .request-name").html(requestName);
-                if (pm.request.collectionRequestId === req.id) {
+                $('#sidebar-request-' + req.itemid + " .request .request-name").html(requestName);
+                if (pm.request.collectionRequestId === req.itemid) {
                     $('#request-name').html(req.name);
                     $('#request-description').html(req.description);
                 }
@@ -1016,11 +1016,11 @@ pm.collections = {
         });
     },
 
-    deleteCollection:function (id) {
-        pm.indexedDB.deleteCollection(id, function () {
-            pm.layout.sidebar.removeCollection(id);
+    deleteCollection:function (itemid) {
+        pm.indexedDB.deleteCollection(itemid, function () {
+            pm.layout.sidebar.removeCollection(itemid);
 
-            var target = '#select-collection option[value="' + id + '"]';
+            var target = '#select-collection option[value="' + itemid + '"]';
             $(target).remove();
         });
     },
@@ -1049,6 +1049,143 @@ pm.collections = {
             });
 
         });
+    }
+};
+pm.couchsave = {
+    host:'http://localhost:3001/',
+    urlcollectionget : function(itemid){
+        return this.get(this.host + 'collection/' + itemid);
+    },
+    urlcollectioninsert : function(itemid, data){
+        return this.put(this.host + 'collection/' + itemid, data);
+    },
+    urlcollectiondelete : function(itemid){
+        return this.delete(this.host + 'collection/' + itemid);
+    },
+    //
+    urlrequestget : function(itemid){
+         return this.get(this.host + 'requests/'+ itemid);
+    },
+    urlrequestinsert : function(itemid, data){
+        return this.put(this.host + 'requests/' + itemid, data);
+    },
+    urlrequestdelete : function(itemid){
+        return this.delete(this.host + 'requests/'+ itemid);
+    },
+    //
+    urlcollrequestget : function(itemid){
+        return this.get(this.host + 'collection_requests/' + itemid);
+    },
+    urlcollrequestinsert : function(itemid, data){
+        return this.put(this.host + 'collection_requests/' + itemid, data);
+    },
+    urlcollrequestdelete : function(itemid){
+        return this.delete(this.host + 'collection_requests/'+ itemid);
+    },
+    //
+    urlenvironmentget : function(itemid){
+        return this.get(this.host + 'environments/'+ itemid);
+    },
+    urlenvironmentinsert : function(itemid, data){
+        return this.put(this.host + 'environments/' + itemid, data);
+    },
+    urlenvironmentdelete : function(itemid){
+        return this.delete(this.host + 'environments/'+ itemid);
+    },
+    //
+    urlheaderpresetget : function(itemid){
+        return this.get(this.host + 'header_presets/'+ itemid);
+    },
+    urlheaderpresetinsert : function(itemid, data){
+        return this.put(this.host + 'header_presets/' + itemid, data);
+    },
+    urlheaderpresetdelete : function(itemid){
+        return this.delete(this.host + 'header_presets/'+ itemid);
+    },
+    //
+    urlenvironmentsall : function(){
+        return this.get(this.host + 'environmentsall/');
+    },
+    urlheaderpresetsall : function(){
+        return this.get(this.host + 'header_presetsall/');
+    },
+    urlcollectiongetall : function(){
+        return this.get(this.host + 'collectionall/');
+    },
+    urlcolrequestsall : function(){
+        return this.get(this.host + 'collection_requestsall/');
+    },    
+    urlrequestsall : function(){
+        return this.get(this.host + 'requestsall/');
+    },
+    urlrequestsall : function(){
+        return this.get(this.host + 'requestsall/');
+    },
+    urlcollectionalldelete: function()
+    {
+        return this.delete(this.host + 'collectionall/');
+    },
+    urlcolrequestalldelete: function(itemid)
+    {
+        return this.delete(this.host + 'collection_requestsall/' + itemid);
+    },
+    
+    get : function(url) {
+        url = url;
+        return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: url,
+                    dataType: 'json',
+                    type: 'get',
+                    contentType: 'application/json',
+                    processData: false,
+                    success: function( data, textStatus, jQxhr ){
+                        resolve(data );
+                    },
+                    error: function( jqXhr, textStatus, errorThrown ){
+                        reject(errorThrown);
+                    }
+                })
+            });
+
+    },
+    put : function(url, jsoncontent) {
+            url = url;
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: url,
+                    dataType: 'json',
+                    type: 'put',
+                    contentType: 'application/json',
+                    data: JSON.stringify( jsoncontent ),
+                    processData: false,
+                    success: function( data, textStatus, jQxhr ){
+                        resolve(data );
+                    },
+                    error: function( jqXhr, textStatus, errorThrown ){
+                        reject(errorThrown);
+                    }
+                })
+            });
+
+    },
+    delete : function(url) {
+            url = url;
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: url,
+                    dataType: 'json',
+                    type: 'delete',
+                    contentType: 'application/json',
+                    processData: false,
+                    success: function( data, textStatus, jQxhr ){
+                        resolve(data );
+                    },
+                    error: function( jqXhr, textStatus, errorThrown ){
+                        reject(errorThrown);
+                    }
+                })
+            });    
     }
 };
 pm.editor = {
@@ -1182,24 +1319,24 @@ pm.envManager = {
         $('#environment-list').append(Handlebars.templates.environment_list({"items":this.environments}));
 
         $('#environments-list').on("click", ".environment-action-delete", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
             $('a[rel="tooltip"]').tooltip('hide');
-            pm.envManager.deleteEnvironment(id);
+            pm.envManager.deleteEnvironment(itemid);
         });
 
         $('#environments-list').on("click", ".environment-action-edit", function () {
-            var id = $(this).attr('data-id');
-            pm.envManager.showEditor(id);
+            var itemid = $(this).attr('data-id');
+            pm.envManager.showEditor(itemid);
         });
 
         $('#environments-list').on("click", ".environment-action-duplicate", function () {
-            var id = $(this).attr('data-id');
-            pm.envManager.duplicateEnvironment(id);
+            var itemid = $(this).attr('data-id');
+            pm.envManager.duplicateEnvironment(itemid);
         });
 
         $('#environments-list').on("click", ".environment-action-download", function () {
-            var id = $(this).attr('data-id');
-            pm.envManager.downloadEnvironment(id);
+            var itemid = $(this).attr('data-id');
+            pm.envManager.downloadEnvironment(itemid);
         });
 
         $('.environment-action-back').on("click", function () {
@@ -1207,10 +1344,10 @@ pm.envManager = {
         });
 
         $('#environment-selector').on("click", ".environment-list-item", function () {
-            var id = $(this).attr('data-id');
-            var selectedEnv = pm.envManager.getEnvironmentFromId(id);
+            var itemid = $(this).attr('data-id');
+            var selectedEnv = pm.envManager.getEnvironmentFromId(itemid);
             pm.envManager.selectedEnv = selectedEnv;
-            pm.settings.set("selectedEnvironmentId", selectedEnv.id);
+            pm.settings.set("selectedEnvironmentId", selectedEnv.itemid);
             pm.envManager.quicklook.refreshEnvironment(selectedEnv);
             $('#environment-selector .environment-list-item-selected').html(selectedEnv.name);
         });
@@ -1250,8 +1387,8 @@ pm.envManager = {
         });
 
         $('.environments-actions-add-submit').on("click", function () {
-            var id = $('#environment-editor-id').val();
-            if (id === "0") {
+            var itemid = $('#environment-editor-id').val();
+            if (itemid === "0") {
                 pm.envManager.addEnvironment();
             }
             else {
@@ -1294,12 +1431,12 @@ pm.envManager = {
         pm.envManager.quicklook.init();
     },
 
-    getEnvironmentFromId:function (id) {
+    getEnvironmentFromId:function (itemid) {
         var environments = pm.envManager.environments;
         var count = environments.length;
         for (var i = 0; i < count; i++) {
             var env = environments[i];
-            if (id === env.id) {
+            if (itemid === env.itemid) {
                 return env;
             }
         }
@@ -1440,11 +1577,11 @@ pm.envManager = {
         $('#modal-environments .modal-footer').css("display", "none");
     },
 
-    showEditor:function (id) {
-        if (id) {
-            var environment = pm.envManager.getEnvironmentFromId(id);
+    showEditor:function (itemid) {
+        if (itemid) {
+            var environment = pm.envManager.getEnvironmentFromId(itemid);
             $('#environment-editor-name').val(environment.name);
-            $('#environment-editor-id').val(id);
+            $('#environment-editor-id').val(itemid);
             $('#environment-keyvaleditor').keyvalueeditor('reset', environment.values);
         }
         else {
@@ -1479,7 +1616,7 @@ pm.envManager = {
         var name = $('#environment-editor-name').val();
         var values = $('#environment-keyvaleditor').keyvalueeditor('getValues');
         var environment = {
-            id:guid(),
+            itemid:guid(),
             name:name,
             values:values,
             timestamp:new Date().getTime()
@@ -1492,11 +1629,11 @@ pm.envManager = {
     },
 
     updateEnvironment:function () {
-        var id = $('#environment-editor-id').val();
+        var itemid = $('#environment-editor-id').val();
         var name = $('#environment-editor-name').val();
         var values = $('#environment-keyvaleditor').keyvalueeditor('getValues');
         var environment = {
-            id:id,
+            itemid:itemid,
             name:name,
             values:values,
             timestamp:new Date().getTime()
@@ -1508,21 +1645,21 @@ pm.envManager = {
         });
     },
 
-    deleteEnvironment:function (id) {
-        pm.indexedDB.environments.deleteEnvironment(id, function () {
+    deleteEnvironment:function (itemid) {
+        pm.indexedDB.environments.deleteEnvironment(itemid, function () {
             pm.envManager.getAllEnvironments();
             pm.envManager.showSelector();
         });
     },
 
-    duplicateEnvironment:function (id) {
-        var env = pm.envManager.getEnvironmentFromId(id);
+    duplicateEnvironment:function (itemid) {
+        var env = pm.envManager.getEnvironmentFromId(itemid);
         
         //get a new name for this duplicated environment
         env.name = env.name + " " + "copy";
         
         //change the env guid
-        env.id = guid();
+        env.itemid = guid();
 
         pm.indexedDB.environments.addEnvironment(env, function () {
             //Add confirmation
@@ -1535,8 +1672,8 @@ pm.envManager = {
         });        
     },
 
-    downloadEnvironment:function (id) {
-        var env = pm.envManager.getEnvironmentFromId(id);
+    downloadEnvironment:function (itemid) {
+        var env = pm.envManager.getEnvironmentFromId(itemid);
         var name = env.name + "-environment.json";
         var type = "application/json";
         var filedata = JSON.stringify(env);
@@ -1736,31 +1873,31 @@ pm.headerPresets = {
         });
 
         $(".header-presets-actions-submit").on("click", function () {
-            var id = $('#header-presets-editor-id').val();
-            if (id === "0") {
+            var itemid = $('#header-presets-editor-id').val();
+            if (itemid === "0") {
                 pm.headerPresets.addHeaderPreset();
             }
             else {
                 var name = $('#header-presets-editor-name').val();
                 var headers = $("#header-presets-keyvaleditor").keyvalueeditor("getValues");
-                pm.headerPresets.editHeaderPreset(id, name, headers);
+                pm.headerPresets.editHeaderPreset(itemid, name, headers);
             }
 
             pm.headerPresets.showList();
         });
 
         $("#header-presets-list").on("click", ".header-preset-action-edit", function () {
-            var id = $(this).attr("data-id");
-            var preset = pm.headerPresets.getHeaderPreset(id);
+            var itemid = $(this).attr("data-id");
+            var preset = pm.headerPresets.getHeaderPreset(itemid);
             $('#header-presets-editor-name').val(preset.name);
-            $('#header-presets-editor-id').val(preset.id);
+            $('#header-presets-editor-id').val(preset.itemid);
             $('#header-presets-keyvaleditor').keyvalueeditor('reset', preset.headers);
             pm.headerPresets.showEditor();
         });
 
         $("#header-presets-list").on("click", ".header-preset-action-delete", function () {
-            var id = $(this).attr("data-id");
-            pm.headerPresets.deleteHeaderPreset(id);
+            var itemid = $(this).attr("data-id");
+            pm.headerPresets.deleteHeaderPreset(itemid);
         });
     },
 
@@ -1792,9 +1929,9 @@ pm.headerPresets = {
         $("#header-presets-editor").css("display", "block");
     },
 
-    getHeaderPreset:function (id) {
+    getHeaderPreset:function (itemid) {
         for (var i = 0, count = pm.headerPresets.presets.length; i < count; i++) {
-            if (pm.headerPresets.presets[i].id === id) break;
+            if (pm.headerPresets.presets[i].itemid === itemid) break;
         }
 
         var preset = pm.headerPresets.presets[i];
@@ -1804,10 +1941,10 @@ pm.headerPresets = {
     addHeaderPreset:function () {
         var name = $("#header-presets-editor-name").val();
         var headers = $("#header-presets-keyvaleditor").keyvalueeditor("getValues");
-        var id = guid();
+        var itemid = guid();
 
         var headerPreset = {
-            "id":id,
+            "itemid":itemid,
             "name":name,
             "headers":headers,
             "timestamp":new Date().getTime()
@@ -1818,10 +1955,10 @@ pm.headerPresets = {
         });
     },
 
-    editHeaderPreset:function (id, name, headers) {
-        pm.indexedDB.headerPresets.getHeaderPreset(id, function (preset) {
+    editHeaderPreset:function (itemid, name, headers) {
+        pm.indexedDB.headerPresets.getHeaderPreset(itemid, function (preset) {
             var headerPreset = {
-                "id":id,
+                "itemid":itemid,
                 "name":name,
                 "headers":headers,
                 "timestamp":preset.timestamp
@@ -1833,8 +1970,8 @@ pm.headerPresets = {
         });
     },
 
-    deleteHeaderPreset:function (id) {
-        pm.indexedDB.headerPresets.deleteHeaderPreset(id, function () {
+    deleteHeaderPreset:function (itemid) {
+        pm.indexedDB.headerPresets.deleteHeaderPreset(itemid, function () {
             pm.headerPresets.loadPresets();
         });
     },
@@ -1844,7 +1981,7 @@ pm.headerPresets = {
         for (var i = 0, count = pm.headerPresets.presets.length; i < count; i++) {
             var preset = pm.headerPresets.presets[i];
             var item = {
-                "id":preset.id,
+                "itemid":preset.itemid,
                 "type":"preset",
                 "label":preset.name,
                 "category":"Header presets"
@@ -2365,7 +2502,7 @@ pm.history = {
                     var request = {
                         url:url,
                         method:historyRequests[i].method,
-                        id:historyRequests[i].id,
+                        itemid:historyRequests[i].itemid,
                         position:"top"
                     };
 
@@ -2384,8 +2521,8 @@ pm.history = {
 
     },
 
-    loadRequest:function (id) {
-        pm.indexedDB.getRequest(id, function (request) {
+    loadRequest:function (itemid) {
+        pm.indexedDB.getRequest(itemid, function (request) {
             pm.request.isFromCollection = false;
             $('.sidebar-collection-request').removeClass('sidebar-collection-request-active');
             pm.request.loadRequestInEditor(request);
@@ -2393,7 +2530,7 @@ pm.history = {
     },
 
     addRequest:function (url, method, headers, data, dataMode) {        
-        var id = guid();
+        var itemid = guid();
         var maxHistoryCount = pm.settings.get("historyCount");
         var requests = this.requests;
         var requestsCount = this.requests.length;
@@ -2402,12 +2539,12 @@ pm.history = {
             if (requestsCount >= maxHistoryCount) {
                 //Delete the last request
                 var lastRequest = requests[0];
-                this.deleteRequest(lastRequest.id);
+                this.deleteRequest(lastRequest.itemid);
             }    
         }        
 
         var historyRequest = {
-            "id":id,
+            "itemid":itemid,
             "url":url.toString(),
             "method":method.toString(),
             "headers":headers.toString(),
@@ -2420,25 +2557,25 @@ pm.history = {
         var index = this.requestExists(historyRequest);
 
         if (index >= 0) {
-            var deletedId = requests[index].id;
+            var deletedId = requests[index].itemid;
             this.deleteRequest(deletedId);
         }
 
         pm.indexedDB.addRequest(historyRequest, function (request) {
             pm.urlCache.addUrl(request.url);
-            pm.layout.sidebar.addRequest(request.url, request.method, id, "top");
+            pm.layout.sidebar.addRequest(request.url, request.method, itemid, "top");
             pm.history.requests.push(request);
         });
     },
 
 
-    deleteRequest:function (id) {
-        pm.indexedDB.deleteRequest(id, function (request_id) {
+    deleteRequest:function (itemid) {
+        pm.indexedDB.deleteRequest(itemid, function (request_id) {
             var historyRequests = pm.history.requests;
             var k = -1;
             var len = historyRequests.length;
             for (var i = 0; i < len; i++) {
-                if (historyRequests[i].id === request_id) {
+                if (historyRequests[i].itemid === request_id) {
                     k = i;
                     break;
                 }
@@ -2484,17 +2621,17 @@ pm.indexedDB = {
                 setVrequest.onsuccess = function (event) {
                     //Only create if does not already exist
                     if (!db.objectStoreNames.contains("requests")) {
-                        var requestStore = db.createObjectStore("requests", {keyPath:"id"});
+                        var requestStore = db.createObjectStore("requests", {keyPath:"itemid"});
                         requestStore.createIndex("timestamp", "timestamp", { unique:false});
                     }
 
                     if (!db.objectStoreNames.contains("collections")) {
-                        var collectionsStore = db.createObjectStore("collections", {keyPath:"id"});
+                        var collectionsStore = db.createObjectStore("collections", {keyPath:"itemid"});
                         collectionsStore.createIndex("timestamp", "timestamp", { unique:false});
                     }
 
                     if (!db.objectStoreNames.contains("collection_requests")) {
-                        var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"id"});
+                        var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"itemid"});
                         collectionRequestsStore.createIndex("timestamp", "timestamp", { unique:false});
                         collectionRequestsStore.createIndex("collectionId", "collectionId", { unique:false});
                     }
@@ -2504,13 +2641,13 @@ pm.indexedDB = {
                     }
 
                     if (!db.objectStoreNames.contains("environments")) {
-                        var environmentsStore = db.createObjectStore("environments", {keyPath:"id"});
+                        var environmentsStore = db.createObjectStore("environments", {keyPath:"itemid"});
                         environmentsStore.createIndex("timestamp", "timestamp", { unique:false});
-                        environmentsStore.createIndex("id", "id", { unique:false});
+                        environmentsStore.createIndex("itemid", "itemid", { unique:false});
                     }
 
                     if (!db.objectStoreNames.contains("header_presets")) {
-                        var requestStore = db.createObjectStore("header_presets", {keyPath:"id"});
+                        var requestStore = db.createObjectStore("header_presets", {keyPath:"itemid"});
                         requestStore.createIndex("timestamp", "timestamp", { unique:false});
                     }
 
@@ -2545,17 +2682,17 @@ pm.indexedDB = {
             var db = e.target.result;
             pm.indexedDB.db = db;
             if (!db.objectStoreNames.contains("requests")) {
-                var requestStore = db.createObjectStore("requests", {keyPath:"id"});
+                var requestStore = db.createObjectStore("requests", {keyPath:"itemid"});
                 requestStore.createIndex("timestamp", "timestamp", { unique:false});
             }
 
             if (!db.objectStoreNames.contains("collections")) {
-                var collectionsStore = db.createObjectStore("collections", {keyPath:"id"});
+                var collectionsStore = db.createObjectStore("collections", {keyPath:"itemid"});
                 collectionsStore.createIndex("timestamp", "timestamp", { unique:false});
             }
 
             if (!db.objectStoreNames.contains("collection_requests")) {
-                var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"id"});
+                var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"itemid"});
                 collectionRequestsStore.createIndex("timestamp", "timestamp", { unique:false});
                 collectionRequestsStore.createIndex("collectionId", "collectionId", { unique:false});
             }
@@ -2565,13 +2702,13 @@ pm.indexedDB = {
             }
 
             if (!db.objectStoreNames.contains("environments")) {
-                var environmentsStore = db.createObjectStore("environments", {keyPath:"id"});
+                var environmentsStore = db.createObjectStore("environments", {keyPath:"itemid"});
                 environmentsStore.createIndex("timestamp", "timestamp", { unique:false});
-                environmentsStore.createIndex("id", "id", { unique:false});
+                environmentsStore.createIndex("itemid", "itemid", { unique:false});
             }
 
             if (!db.objectStoreNames.contains("header_presets")) {
-                var requestStore = db.createObjectStore("header_presets", {keyPath:"id"});
+                var requestStore = db.createObjectStore("header_presets", {keyPath:"itemid"});
                 requestStore.createIndex("timestamp", "timestamp", { unique:false});
             }
         };
@@ -2593,6 +2730,10 @@ pm.indexedDB = {
         else {
             pm.indexedDB.open_latest();
         }
+
+        pm.couchsave.urlcollectiongetall().then(()=>{}).catch((err) => {
+            console.log("error opening couchbasedb, data will not be saved in couchbasedb : " + err )
+        })
     },
 
     addCollection:function (collection, callback) {
@@ -2603,29 +2744,36 @@ pm.indexedDB = {
         var request;
 
         if("order" in collection) {
-            request = store.put({
-                "id":collection.id,
+            var col = {
+                "itemid":collection.itemid,
                 "name":collection.name,
                 "order":collection.order,
                 "timestamp":new Date().getTime()
-            });
+            };
+
+            //request = store.put(col);
+            request =pm.couchsave.urlcollectioninsert(col.itemid, col)
+
         }
         else {
-            request = store.put({
-                "id":collection.id,
+            var col = {
+                "itemid":collection.itemid,
                 "name":collection.name,
                 "timestamp":new Date().getTime()
-            });
+            }
+            //request = store.put(col);
+            store.put(col);
+            request = pm.couchsave.urlcollectioninsert(col.itemid, col)
         }
 
 
-        request.onsuccess = function () {
+        //request.onsuccess = function () {
+        request.then(function () {
             callback(collection);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
     updateCollection:function (collection, callback) {
@@ -2633,16 +2781,17 @@ pm.indexedDB = {
         var trans = db.transaction(["collections"], "readwrite");
         var store = trans.objectStore("collections");
 
-        var boundKeyRange = IDBKeyRange.only(collection.id);
-        var request = store.put(collection);
-
-        request.onsuccess = function (e) {
+        var boundKeyRange = IDBKeyRange.only(collection.itemid);
+        //var request = store.put(collection);
+        store.put(collection);
+        var request = pm.couchsave.urlcollectioninsert(collection.itemid, collection)
+        //request.onsuccess = function (e) {
+        request.then(function (e) {
             callback(collection);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
     addCollectionRequest:function (req, callback) {
@@ -2658,10 +2807,9 @@ pm.indexedDB = {
         else {
             version = 1;
         }
-
-        var collectionRequest = store.put({
+        var col = {
             "collectionId":req.collectionId,
-            "id":req.id,
+            "itemid":req.itemid,
             "name":req.name,
             "description":req.description,
             "url":req.url.toString(),
@@ -2672,15 +2820,18 @@ pm.indexedDB = {
             "timestamp":req.timestamp,
             "responses":req.responses,
             "version":req.version
-        });
+        };
+        var collectionRequest = pm.couchsave.urlcollrequestinsert(col.itemid, col)
 
-        collectionRequest.onsuccess = function () {
+        //var collectionRequest = store.put();
+        store.put();
+        //collectionRequest.onsuccess = function () {
+        collectionRequest.then(function () {
             callback(req);
-        };
-
-        collectionRequest.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
     updateCollectionRequest:function (req, callback) {
@@ -2688,31 +2839,38 @@ pm.indexedDB = {
         var trans = db.transaction(["collection_requests"], "readwrite");
         var store = trans.objectStore("collection_requests");
 
-        var boundKeyRange = IDBKeyRange.only(req.id);
-        var request = store.put(req);
+        var boundKeyRange = IDBKeyRange.only(req.itemid);
+        var request = pm.couchsave.urlcollrequestinsert(req.itemid, req)
+        //var request = store.put(req);
+        store.put(req);
 
-        request.onsuccess = function (e) {
+        //request.onsuccess = function (e) {
+        request.then(function (e) {
             callback(req);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
-    getCollection:function (id, callback) {
+    getCollection:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collections"], "readwrite");
         var store = trans.objectStore("collections");
 
         //Get everything in the store
-        var cursorRequest = store.get(id);
-
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
+        //var cursorRequest = store.get(itemid);
+        store.get(itemid);
+        var cursorRequest = pm.couchsave.urlcollectionget(itemid)
+        //cursorRequest.onsuccess = function (e) {
+        cursorRequest.then((e)=>{
+            var result = e;
             callback(result);
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+        },
+        (err) =>
+        {
+            console.log(err);    
+        });
     },
 
     getCollections:function (callback) {
@@ -2727,27 +2885,27 @@ pm.indexedDB = {
 
         //Get everything in the store
         var keyRange = IDBKeyRange.lowerBound(0);
-        var cursorRequest = store.openCursor(keyRange);
-        var numCollections = 0;
+        //var cursorRequest = store.openCursor(keyRange);
+        store.openCursor(keyRange);
+        var cursorRequest = pm.couchsave.urlcollectiongetall();
+        //var numCollections = 0;
         var items = [];
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
-            if (!result) {
-                callback(items);
-                return;
-            }
+        //cursorRequest.onsuccess = function (e) {
+            cursorRequest.then(function (e) {
+                var results = e;
+                if(undefined === results)
+                {
+                    callback(items);
+                    return;
+                }
 
-            var collection = result.value;
-            numCollections++;
-
-            items.push(collection);
-
-            result['continue']();
-        };
-
-        cursorRequest.onerror = function (e) {
+                results.forEach((val)=>{
+                    items.push(val);    
+                });
+                callback(items);            
+        },function (e) {
             console.log(e);
-        };
+        });
     },
 
     getAllRequestsInCollection:function (collection, callback) {
@@ -2755,83 +2913,89 @@ pm.indexedDB = {
         var trans = db.transaction(["collection_requests"], "readwrite");
 
         //Get everything in the store
-        var keyRange = IDBKeyRange.only(collection.id);
+        var keyRange = IDBKeyRange.only(collection.itemid);
         var store = trans.objectStore("collection_requests");
 
         var index = store.index("collectionId");
-        var cursorRequest = index.openCursor(keyRange);
-
+        index.openCursor(keyRange);
+        var cursorRequest = pm.couchsave.urlcolrequestsall();
         var requests = [];
 
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
-
-            if (!result) {
-                callback(collection, requests);
+        cursorRequest.then(function (e) {
+            var results = e;
+            if(undefined === results)
+            {
+                callback(requests);
                 return;
             }
 
-            var request = result.value;
-            requests.push(request);
-
-            //This wil call onsuccess again and again until no more request is left
-            result['continue']();
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+            results.forEach((val)=>{
+                requests.push(val);    
+            });
+                
+        },
+        //cursorRequest.onerror = pm.indexedDB.onerror;
+        (e) =>
+        {
+            console.log(e);
+        });
     },
 
     addRequest:function (historyRequest, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["requests"], "readwrite");
         var store = trans.objectStore("requests");
-        var request = store.put(historyRequest);
-
-        request.onsuccess = function (e) {
+        store.put(historyRequest);
+        var request = pm.couchsave.urlrequestinsert(historyRequest.itemid,historyRequest);
+        request.then(function (e) {
             callback(historyRequest);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
-    getRequest:function (id, callback) {
+    getRequest:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["requests"], "readwrite");
         var store = trans.objectStore("requests");
 
         //Get everything in the store
-        var cursorRequest = store.get(id);
-
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
+        store.get(itemid);
+        var cursorRequest = pm.couchsave.urlrequestget(itemid);
+        cursorRequest.then(function (e) {
+            var result = e;
             if (!result) {
                 return;
             }
 
             callback(result);
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+        },
+        (e)=>{
+            console.log(e);
+        });
     },
 
-    getCollectionRequest:function (id, callback) {
+    getCollectionRequest:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collection_requests"], "readwrite");
         var store = trans.objectStore("collection_requests");
 
         //Get everything in the store
-        var cursorRequest = store.get(id);
-
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
+        store.get(itemid);
+        var cursorRequest = pm.couchsave.urlcollrequestget(itemid);
+        cursorRequest.then(function (e) {
+            var result = e;
             if (!result) {
                 return;
             }
 
             callback(result);
             return result;
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+        },
+        (e) => {
+            console.log(e);
+        });
     },
 
 
@@ -2847,42 +3011,42 @@ pm.indexedDB = {
         //Get everything in the store
         var keyRange = IDBKeyRange.lowerBound(0);
         var index = store.index("timestamp");
-        var cursorRequest = index.openCursor(keyRange);
+        index.openCursor(keyRange);
+        var cursorRequest = pm.couchsave.urlrequestsall();
         var historyRequests = [];
 
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
-
-            if (!result) {
+        cursorRequest.then(function (e) {
+            var results = e;
+            if(undefined === results)
+            {
                 callback(historyRequests);
                 return;
             }
 
-            var request = result.value;
-            historyRequests.push(request);
-
-            //This wil call onsuccess again and again until no more request is left
-            result['continue']();
-        };
-
-        cursorRequest.onerror = pm.indexedDB.onerror;
+            results.forEach((val)=>{
+                historyRequests.push(val);    
+            });
+            callback(historyRequests);
+            
+        },
+        (e)=>{
+           console.log(e); 
+        });
     },
 
-    deleteRequest:function (id, callback) {
+    deleteRequest:function (itemid, callback) {
         try {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["requests"], "readwrite");
             var store = trans.objectStore(["requests"]);
 
-            var request = store['delete'](id);
-
-            request.onsuccess = function () {
-                callback(id);
-            };
-
-            request.onerror = function (e) {
+            store['delete'](itemid);
+            var request = pm.couchsave.urlrequestdelete(itemid);    
+            request.then(function () {
+                callback(itemid);
+            },function (e) {
                 console.log(e);
-            };
+            });
         }
         catch (e) {
             console.log(e);
@@ -2896,30 +3060,34 @@ pm.indexedDB = {
         clearRequest.onsuccess = function (event) {
             callback();
         };
+
+        console.log("Delete history will not work for all the records from couchbase, delete records individually");
     },
 
-    deleteCollectionRequest:function (id, callback) {
+    deleteCollectionRequest:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collection_requests"], "readwrite");
         var store = trans.objectStore(["collection_requests"]);
 
-        var request = store['delete'](id);
-
-        request.onsuccess = function (e) {
-            callback(id);
-        };
-
-        request.onerror = function (e) {
+        store['delete'](itemid);
+        var request = pm.couchsave.urlcollrequestdelete(itemid);
+        request.then(function (e) {
+            callback(itemid);
+        },
+        function (e) {
             console.log(e);
-        };
+        });
     },
 
-    deleteAllCollectionRequests:function (id) {
+    deleteAllCollectionRequests:function (itemid) {
         var db = pm.indexedDB.db;
-        var trans = db.transaction(["collection_requests"], "readwrite");
+        var trans = db.transactio
+
+
+        n(["collection_requests"], "readwrite");
 
         //Get everything in the store
-        var keyRange = IDBKeyRange.only(id);
+        var keyRange = IDBKeyRange.only(itemid);
         var store = trans.objectStore("collection_requests");
 
         var index = store.index("collectionId");
@@ -2933,27 +3101,34 @@ pm.indexedDB = {
             }
 
             var request = result.value;
-            pm.collections.deleteCollectionRequest(request.id);
+            pm.collections.deleteCollectionRequest(request.itemid);
             result['continue']();
         };
         cursorRequest.onerror = pm.indexedDB.onerror;
+        var requestpro = pm.couchsave.urlcolrequestalldelete(itemid);
+        requestpro.then((e) => {},(e)=>
+        {
+            console.log(e);
+        });
+        //todo:
+        //console.log("Delete collection_requests will not work for all the records from couchbase, delete records individually");
     },
 
-    deleteCollection:function (id, callback) {
+    deleteCollection:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collections"], "readwrite");
         var store = trans.objectStore(["collections"]);
 
-        var request = store['delete'](id);
-
-        request.onsuccess = function () {
-            pm.indexedDB.deleteAllCollectionRequests(id);
-            callback(id);
-        };
-
-        request.onerror = function (e) {
+        store['delete'](itemid);
+        var request = pm.couchsave.urlcollectiondelete(itemid);
+        request.then(function (e) {
+            //todo: this is not implemented in couchdb
+            pm.indexedDB.deleteAllCollectionRequests(itemid);
+            callback(itemid);
+        },
+        function (e) {
             console.log(e);
-        };
+        });
     },
 
     environments:{
@@ -2961,46 +3136,47 @@ pm.indexedDB = {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore("environments");
-            var request = store.put(environment);
-
-            request.onsuccess = function (e) {
+            store.put(environment);
+            var request = pm.couchsave.urlenvironmentget(environment.itemid, environment);
+            request.then(function (e) {
                 callback(environment);
-            };
-
-            request.onerror = function (e) {
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
-        getEnvironment:function (id, callback) {
+        getEnvironment:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore("environments");
 
             //Get everything in the store
-            var cursorRequest = store.get(id);
-
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
+            store.get(itemid);
+            var cursorRequest = pm.couchsave.urlenvironmentget(itemid);
+            cursorRequest.then(function (e) {
+                var result = e;
                 callback(result);
-            };
-            cursorRequest.onerror = pm.indexedDB.onerror;
+            },
+            (e)=>
+            {
+                console.log(e);
+            });
         },
 
-        deleteEnvironment:function (id, callback) {
+        deleteEnvironment:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore(["environments"]);
 
-            var request = store['delete'](id);
-
-            request.onsuccess = function () {
-                callback(id);
-            };
-
-            request.onerror = function (e) {
+            store['delete'](itemid);
+            var request = pm.couchsave.urlenvironmentdelete(itemid);
+            request.then(function () {
+                callback(itemid);
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
         getAllEnvironments:function (callback) {
@@ -3015,25 +3191,27 @@ pm.indexedDB = {
             //Get everything in the store
             var keyRange = IDBKeyRange.lowerBound(0);
             var index = store.index("timestamp");
-            var cursorRequest = index.openCursor(keyRange);
+            index.openCursor(keyRange);
+            var cursorRequest = pm.couchsave.urlenvironmentsall();
             var environments = [];
 
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
-
-                if (!result) {
+            cursorRequest.then(function (e) {
+                var results = e;
+                if(undefined === results)
+                {
                     callback(environments);
                     return;
                 }
 
-                var request = result.value;
-                environments.push(request);
-
-                //This wil call onsuccess again and again until no more request is left
-                result['continue']();
-            };
-
-            cursorRequest.onerror = pm.indexedDB.onerror;
+                results.forEach((val)=>{
+                    environments.push(val);
+                });
+                    
+                callback(environments);
+            },
+            (e)=>{
+                console.log(e);
+            });
         },
 
         updateEnvironment:function (environment, callback) {
@@ -3041,16 +3219,15 @@ pm.indexedDB = {
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore("environments");
 
-            var boundKeyRange = IDBKeyRange.only(environment.id);
-            var request = store.put(environment);
-
-            request.onsuccess = function (e) {
+            var boundKeyRange = IDBKeyRange.only(environment.itemid);
+            store.put(environment);
+            var request = pm.couchsave.urlenvironmentinsert(environment.itemid)
+            request.then(function (e) {
                 callback(environment);
-            };
-
-            request.onerror = function (e) {
-                console.log(e.value);
-            };
+            },
+            function (e) {
+                console.log(e);
+            });
         }
     },
 
@@ -3059,46 +3236,47 @@ pm.indexedDB = {
             var db = pm.indexedDB.db;
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore(pm.indexedDB.TABLE_HEADER_PRESETS);
-            var request = store.put(headerPreset);
-
-            request.onsuccess = function (e) {
+            store.put(headerPreset);
+            var request = pm.couchsave.urlheaderpresetinsert(headerPreset.itemid, headerPreset);
+            request.then(function (e) {
                 callback(headerPreset);
-            };
-
-            request.onerror = function (e) {
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
-        getHeaderPreset:function (id, callback) {
+        getHeaderPreset:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore(pm.indexedDB.TABLE_HEADER_PRESETS);
 
             //Get everything in the store
-            var cursorRequest = store.get(id);
-
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
+            store.get(itemid);
+            var cursorRequest = pm.couchsave.urlheaderpresetget(itemid);
+            cursorRequest.then(function (e) {
+                var result = e;
                 callback(result);
-            };
-            cursorRequest.onerror = pm.indexedDB.onerror;
+            },
+            (e)=>
+            {
+                console.log(e);
+            });
         },
 
-        deleteHeaderPreset:function (id, callback) {
+        deleteHeaderPreset:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore([pm.indexedDB.TABLE_HEADER_PRESETS]);
 
-            var request = store['delete'](id);
-
-            request.onsuccess = function () {
-                callback(id);
-            };
-
-            request.onerror = function (e) {
+            store['delete'](itemid);
+            var request = pm.couchsave.urlheaderpresetdelete(itemid);
+            request.then(function () {
+                callback(itemid);
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
         getAllHeaderPresets:function (callback) {
@@ -3114,25 +3292,26 @@ pm.indexedDB = {
             //Get everything in the store
             var keyRange = IDBKeyRange.lowerBound(0);
             var index = store.index("timestamp");
-            var cursorRequest = index.openCursor(keyRange);
+            index.openCursor(keyRange);
+            var cursorRequest = pm.couchsave.urlheaderpresetsall();
             var headerPresets = [];
 
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
-
-                if (!result) {
+            cursorRequest.then(function (e) {
+                var results = e;
+                if(undefined === results)
+                {
                     callback(headerPresets);
                     return;
                 }
 
-                var request = result.value;
-                headerPresets.push(request);
-
-                //This wil call onsuccess again and again until no more request is left
-                result['continue']();
-            };
-
-            cursorRequest.onerror = pm.indexedDB.onerror;
+                results.forEach((val)=>{
+                    headerPresets.push(val);    
+                });              
+                callback(headerPresets);
+            },
+            (e)=>{
+                 console.log(e);
+            });
         },
 
         updateHeaderPreset:function (headerPreset, callback) {
@@ -3140,16 +3319,15 @@ pm.indexedDB = {
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore(pm.indexedDB.TABLE_HEADER_PRESETS);
 
-            var boundKeyRange = IDBKeyRange.only(headerPreset.id);
-            var request = store.put(headerPreset);
-
-            request.onsuccess = function (e) {
+            var boundKeyRange = IDBKeyRange.only(headerPreset.itemid);
+            store.put(headerPreset);
+            var request = pm.couchsave.urlheaderpresetinsert(headerPreset.itemid, headerPreset);
+            request.then(function (e) {
                 callback(headerPreset);
-            };
-
-            request.onerror = function (e) {
-                console.log(e.value);
-            };
+            },
+            function (e) {
+                console.log(e);
+            });
         }
     },
 
@@ -3571,7 +3749,7 @@ pm.layout = {
 
             var currentResponse = pm.request.response;
             var request = new CollectionRequest();
-            request.id = guid();
+            request.itemid = guid();
             request.headers = pm.request.getPackedHeaders();
             request.url = url;
             request.method = pm.request.method;
@@ -3582,7 +3760,7 @@ pm.layout = {
             var name = $("#response-sample-name").val();
 
             var response = {
-                "id":guid(),
+                "itemid":guid(),
                 "name":name,
                 "collectionRequestId":pm.request.collectionRequestId,
                 "request":request,
@@ -3604,8 +3782,8 @@ pm.layout = {
         pm.request.response.clear();
 
         $('#sidebar-selectors li a').click(function () {
-            var id = $(this).attr('data-id');
-            pm.layout.sidebar.select(id);
+            var itemid = $(this).attr('data-id');
+            pm.layout.sidebar.select(itemid);
         });
 
         $('a[rel="tooltip"]').tooltip();
@@ -3628,18 +3806,18 @@ pm.layout = {
         });
 
         $('#form-edit-collection').submit(function() {
-            var id = $('#form-edit-collection .collection-id').val();
+            var itemid = $('#form-edit-collection .collection-id').val();
             var name = $('#form-edit-collection .collection-name').val();
-            pm.collections.updateCollection(id, name);
+            pm.collections.updateCollection(itemid, name);
             $('#modal-edit-collection').modal('hide');
             return false;
         });
 
         $('#form-edit-collection-request').submit(function() {
-            var id = $('#form-edit-collection-request .collection-request-id').val();
+            var itemid = $('#form-edit-collection-request .collection-request-id').val();
             var name = $('#form-edit-collection-request .collection-request-name').val();
             var description = $('#form-edit-collection-request .collection-request-description').val();
-            pm.collections.updateCollectionRequestMeta(id, name, description);
+            pm.collections.updateCollectionRequestMeta(itemid, name, description);
             return false;
         });
 
@@ -3649,18 +3827,18 @@ pm.layout = {
         });
 
         $('#modal-edit-collection .btn-primary').click(function () {
-            var id = $('#form-edit-collection .collection-id').val();
+            var itemid = $('#form-edit-collection .collection-id').val();
             var name = $('#form-edit-collection .collection-name').val();
 
-            pm.collections.updateCollectionMeta(id, name);
+            pm.collections.updateCollectionMeta(itemid, name);
             $('#modal-edit-collection').modal('hide');
         });
 
         $('#modal-edit-collection-request .btn-primary').click(function () {
-            var id = $('#form-edit-collection-request .collection-request-id').val();
+            var itemid = $('#form-edit-collection-request .collection-request-id').val();
             var name = $('#form-edit-collection-request .collection-request-name').val();
             var description = $('#form-edit-collection-request .collection-request-description').val();
-            pm.collections.updateCollectionRequestMeta(id, name, description);
+            pm.collections.updateCollectionRequestMeta(itemid, name, description);
         });
 
         $(window).resize(function () {
@@ -3949,7 +4127,7 @@ pm.layout = {
             return true;
         },
 
-        addRequest:function (url, method, id, position) {
+        addRequest:function (url, method, itemid, position) {
             if (url.length > 80) {
                 url = url.substring(0, 80) + "...";
             }
@@ -3958,7 +4136,7 @@ pm.layout = {
             var request = {
                 url:url,
                 method:method,
-                id:id,
+                itemid:itemid,
                 position:position
             };
 
@@ -3985,16 +4163,16 @@ pm.layout = {
             });
         },
 
-        emptyCollectionInSidebar:function (id) {
-            $('#collection-requests-' + id).html("");
+        emptyCollectionInSidebar:function (itemid) {
+            $('#collection-requests-' + itemid).html("");
         },
 
-        removeRequestFromHistory:function (id, toAnimate) {
+        removeRequestFromHistory:function (itemid, toAnimate) {
             if (toAnimate) {
-                $('#sidebar-request-' + id).slideUp(100);
+                $('#sidebar-request-' + itemid).slideUp(100);
             }
             else {
-                $('#sidebar-request-' + id).remove();
+                $('#sidebar-request-' + itemid).remove();
             }
 
             if (pm.history.requests.length === 0) {
@@ -4007,8 +4185,8 @@ pm.layout = {
             pm.layout.refreshScrollPanes();
         },
 
-        removeCollection:function (id) {
-            $('#collection-' + id).remove();
+        removeCollection:function (itemid) {
+            $('#collection-' + itemid).remove();
             pm.layout.refreshScrollPanes();
         }
     }
@@ -4467,7 +4645,7 @@ pm.request = {
 
     onHeaderAutoCompleteItemSelect:function(item) {
         if(item.type == "preset") {
-            var preset = pm.headerPresets.getHeaderPreset(item.id);
+            var preset = pm.headerPresets.getHeaderPreset(item.itemid);
             if("headers" in preset) {
                 var headers = $('#headers-keyvaleditor').keyvalueeditor('getValues');
                 var loc = -1;

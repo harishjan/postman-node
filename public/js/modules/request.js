@@ -452,7 +452,7 @@ pm.request = {
 
     onHeaderAutoCompleteItemSelect:function(item) {
         if(item.type == "preset") {
-            var preset = pm.headerPresets.getHeaderPreset(item.id);
+            var preset = pm.headerPresets.getHeaderPreset(item.itemid);
             if("headers" in preset) {
                 var headers = $('#headers-keyvaleditor').keyvalueeditor('getValues');
                 var loc = -1;

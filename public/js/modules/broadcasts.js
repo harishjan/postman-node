@@ -65,7 +65,7 @@ pm.broadcasts = {
                 var b = broadcasts[i];
 
                 var existing = _.find(old_broadcasts, function (br) {
-                    return br.id === b.id;
+                    return br.itemid === b.itemid;
                 });
                 if (!existing) {
                     b["status"] = "unread";

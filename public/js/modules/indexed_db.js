@@ -24,17 +24,17 @@ pm.indexedDB = {
                 setVrequest.onsuccess = function (event) {
                     //Only create if does not already exist
                     if (!db.objectStoreNames.contains("requests")) {
-                        var requestStore = db.createObjectStore("requests", {keyPath:"id"});
+                        var requestStore = db.createObjectStore("requests", {keyPath:"itemid"});
                         requestStore.createIndex("timestamp", "timestamp", { unique:false});
                     }
 
                     if (!db.objectStoreNames.contains("collections")) {
-                        var collectionsStore = db.createObjectStore("collections", {keyPath:"id"});
+                        var collectionsStore = db.createObjectStore("collections", {keyPath:"itemid"});
                         collectionsStore.createIndex("timestamp", "timestamp", { unique:false});
                     }
 
                     if (!db.objectStoreNames.contains("collection_requests")) {
-                        var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"id"});
+                        var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"itemid"});
                         collectionRequestsStore.createIndex("timestamp", "timestamp", { unique:false});
                         collectionRequestsStore.createIndex("collectionId", "collectionId", { unique:false});
                     }
@@ -44,13 +44,13 @@ pm.indexedDB = {
                     }
 
                     if (!db.objectStoreNames.contains("environments")) {
-                        var environmentsStore = db.createObjectStore("environments", {keyPath:"id"});
+                        var environmentsStore = db.createObjectStore("environments", {keyPath:"itemid"});
                         environmentsStore.createIndex("timestamp", "timestamp", { unique:false});
-                        environmentsStore.createIndex("id", "id", { unique:false});
+                        environmentsStore.createIndex("itemid", "itemid", { unique:false});
                     }
 
                     if (!db.objectStoreNames.contains("header_presets")) {
-                        var requestStore = db.createObjectStore("header_presets", {keyPath:"id"});
+                        var requestStore = db.createObjectStore("header_presets", {keyPath:"itemid"});
                         requestStore.createIndex("timestamp", "timestamp", { unique:false});
                     }
 
@@ -85,17 +85,17 @@ pm.indexedDB = {
             var db = e.target.result;
             pm.indexedDB.db = db;
             if (!db.objectStoreNames.contains("requests")) {
-                var requestStore = db.createObjectStore("requests", {keyPath:"id"});
+                var requestStore = db.createObjectStore("requests", {keyPath:"itemid"});
                 requestStore.createIndex("timestamp", "timestamp", { unique:false});
             }
 
             if (!db.objectStoreNames.contains("collections")) {
-                var collectionsStore = db.createObjectStore("collections", {keyPath:"id"});
+                var collectionsStore = db.createObjectStore("collections", {keyPath:"itemid"});
                 collectionsStore.createIndex("timestamp", "timestamp", { unique:false});
             }
 
             if (!db.objectStoreNames.contains("collection_requests")) {
-                var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"id"});
+                var collectionRequestsStore = db.createObjectStore("collection_requests", {keyPath:"itemid"});
                 collectionRequestsStore.createIndex("timestamp", "timestamp", { unique:false});
                 collectionRequestsStore.createIndex("collectionId", "collectionId", { unique:false});
             }
@@ -105,13 +105,13 @@ pm.indexedDB = {
             }
 
             if (!db.objectStoreNames.contains("environments")) {
-                var environmentsStore = db.createObjectStore("environments", {keyPath:"id"});
+                var environmentsStore = db.createObjectStore("environments", {keyPath:"itemid"});
                 environmentsStore.createIndex("timestamp", "timestamp", { unique:false});
-                environmentsStore.createIndex("id", "id", { unique:false});
+                environmentsStore.createIndex("itemid", "itemid", { unique:false});
             }
 
             if (!db.objectStoreNames.contains("header_presets")) {
-                var requestStore = db.createObjectStore("header_presets", {keyPath:"id"});
+                var requestStore = db.createObjectStore("header_presets", {keyPath:"itemid"});
                 requestStore.createIndex("timestamp", "timestamp", { unique:false});
             }
         };
@@ -133,6 +133,10 @@ pm.indexedDB = {
         else {
             pm.indexedDB.open_latest();
         }
+
+        pm.couchsave.urlcollectiongetall().then(()=>{}).catch((err) => {
+            console.log("error opening couchbasedb, data will not be saved in couchbasedb : " + err )
+        })
     },
 
     addCollection:function (collection, callback) {
@@ -143,29 +147,36 @@ pm.indexedDB = {
         var request;
 
         if("order" in collection) {
-            request = store.put({
-                "id":collection.id,
+            var col = {
+                "itemid":collection.itemid,
                 "name":collection.name,
                 "order":collection.order,
                 "timestamp":new Date().getTime()
-            });
+            };
+
+            //request = store.put(col);
+            request =pm.couchsave.urlcollectioninsert(col.itemid, col)
+
         }
         else {
-            request = store.put({
-                "id":collection.id,
+            var col = {
+                "itemid":collection.itemid,
                 "name":collection.name,
                 "timestamp":new Date().getTime()
-            });
+            }
+            //request = store.put(col);
+            store.put(col);
+            request = pm.couchsave.urlcollectioninsert(col.itemid, col)
         }
 
 
-        request.onsuccess = function () {
+        //request.onsuccess = function () {
+        request.then(function () {
             callback(collection);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
     updateCollection:function (collection, callback) {
@@ -173,16 +184,17 @@ pm.indexedDB = {
         var trans = db.transaction(["collections"], "readwrite");
         var store = trans.objectStore("collections");
 
-        var boundKeyRange = IDBKeyRange.only(collection.id);
-        var request = store.put(collection);
-
-        request.onsuccess = function (e) {
+        var boundKeyRange = IDBKeyRange.only(collection.itemid);
+        //var request = store.put(collection);
+        store.put(collection);
+        var request = pm.couchsave.urlcollectioninsert(collection.itemid, collection)
+        //request.onsuccess = function (e) {
+        request.then(function (e) {
             callback(collection);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
     addCollectionRequest:function (req, callback) {
@@ -198,10 +210,9 @@ pm.indexedDB = {
         else {
             version = 1;
         }
-
-        var collectionRequest = store.put({
+        var col = {
             "collectionId":req.collectionId,
-            "id":req.id,
+            "itemid":req.itemid,
             "name":req.name,
             "description":req.description,
             "url":req.url.toString(),
@@ -212,15 +223,18 @@ pm.indexedDB = {
             "timestamp":req.timestamp,
             "responses":req.responses,
             "version":req.version
-        });
+        };
+        var collectionRequest = pm.couchsave.urlcollrequestinsert(col.itemid, col)
 
-        collectionRequest.onsuccess = function () {
+        //var collectionRequest = store.put();
+        store.put();
+        //collectionRequest.onsuccess = function () {
+        collectionRequest.then(function () {
             callback(req);
-        };
-
-        collectionRequest.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
     updateCollectionRequest:function (req, callback) {
@@ -228,31 +242,38 @@ pm.indexedDB = {
         var trans = db.transaction(["collection_requests"], "readwrite");
         var store = trans.objectStore("collection_requests");
 
-        var boundKeyRange = IDBKeyRange.only(req.id);
-        var request = store.put(req);
+        var boundKeyRange = IDBKeyRange.only(req.itemid);
+        var request = pm.couchsave.urlcollrequestinsert(req.itemid, req)
+        //var request = store.put(req);
+        store.put(req);
 
-        request.onsuccess = function (e) {
+        //request.onsuccess = function (e) {
+        request.then(function (e) {
             callback(req);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
-    getCollection:function (id, callback) {
+    getCollection:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collections"], "readwrite");
         var store = trans.objectStore("collections");
 
         //Get everything in the store
-        var cursorRequest = store.get(id);
-
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
+        //var cursorRequest = store.get(itemid);
+        store.get(itemid);
+        var cursorRequest = pm.couchsave.urlcollectionget(itemid)
+        //cursorRequest.onsuccess = function (e) {
+        cursorRequest.then((e)=>{
+            var result = e;
             callback(result);
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+        },
+        (err) =>
+        {
+            console.log(err);    
+        });
     },
 
     getCollections:function (callback) {
@@ -267,27 +288,27 @@ pm.indexedDB = {
 
         //Get everything in the store
         var keyRange = IDBKeyRange.lowerBound(0);
-        var cursorRequest = store.openCursor(keyRange);
-        var numCollections = 0;
+        //var cursorRequest = store.openCursor(keyRange);
+        store.openCursor(keyRange);
+        var cursorRequest = pm.couchsave.urlcollectiongetall();
+        //var numCollections = 0;
         var items = [];
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
-            if (!result) {
-                callback(items);
-                return;
-            }
+        //cursorRequest.onsuccess = function (e) {
+            cursorRequest.then(function (e) {
+                var results = e;
+                if(undefined === results)
+                {
+                    callback(items);
+                    return;
+                }
 
-            var collection = result.value;
-            numCollections++;
-
-            items.push(collection);
-
-            result['continue']();
-        };
-
-        cursorRequest.onerror = function (e) {
+                results.forEach((val)=>{
+                    items.push(val);    
+                });
+                callback(items);            
+        },function (e) {
             console.log(e);
-        };
+        });
     },
 
     getAllRequestsInCollection:function (collection, callback) {
@@ -295,83 +316,89 @@ pm.indexedDB = {
         var trans = db.transaction(["collection_requests"], "readwrite");
 
         //Get everything in the store
-        var keyRange = IDBKeyRange.only(collection.id);
+        var keyRange = IDBKeyRange.only(collection.itemid);
         var store = trans.objectStore("collection_requests");
 
         var index = store.index("collectionId");
-        var cursorRequest = index.openCursor(keyRange);
-
+        index.openCursor(keyRange);
+        var cursorRequest = pm.couchsave.urlcolrequestsall();
         var requests = [];
 
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
-
-            if (!result) {
-                callback(collection, requests);
+        cursorRequest.then(function (e) {
+            var results = e;
+            if(undefined === results)
+            {
+                callback(requests);
                 return;
             }
 
-            var request = result.value;
-            requests.push(request);
-
-            //This wil call onsuccess again and again until no more request is left
-            result['continue']();
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+            results.forEach((val)=>{
+                requests.push(val);    
+            });
+                
+        },
+        //cursorRequest.onerror = pm.indexedDB.onerror;
+        (e) =>
+        {
+            console.log(e);
+        });
     },
 
     addRequest:function (historyRequest, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["requests"], "readwrite");
         var store = trans.objectStore("requests");
-        var request = store.put(historyRequest);
-
-        request.onsuccess = function (e) {
+        store.put(historyRequest);
+        var request = pm.couchsave.urlrequestinsert(historyRequest.itemid,historyRequest);
+        request.then(function (e) {
             callback(historyRequest);
-        };
-
-        request.onerror = function (e) {
-            console.log(e.value);
-        };
+        },
+        function (e) {
+            console.log(e);
+        });
     },
 
-    getRequest:function (id, callback) {
+    getRequest:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["requests"], "readwrite");
         var store = trans.objectStore("requests");
 
         //Get everything in the store
-        var cursorRequest = store.get(id);
-
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
+        store.get(itemid);
+        var cursorRequest = pm.couchsave.urlrequestget(itemid);
+        cursorRequest.then(function (e) {
+            var result = e;
             if (!result) {
                 return;
             }
 
             callback(result);
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+        },
+        (e)=>{
+            console.log(e);
+        });
     },
 
-    getCollectionRequest:function (id, callback) {
+    getCollectionRequest:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collection_requests"], "readwrite");
         var store = trans.objectStore("collection_requests");
 
         //Get everything in the store
-        var cursorRequest = store.get(id);
-
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
+        store.get(itemid);
+        var cursorRequest = pm.couchsave.urlcollrequestget(itemid);
+        cursorRequest.then(function (e) {
+            var result = e;
             if (!result) {
                 return;
             }
 
             callback(result);
             return result;
-        };
-        cursorRequest.onerror = pm.indexedDB.onerror;
+        },
+        (e) => {
+            console.log(e);
+        });
     },
 
 
@@ -387,42 +414,42 @@ pm.indexedDB = {
         //Get everything in the store
         var keyRange = IDBKeyRange.lowerBound(0);
         var index = store.index("timestamp");
-        var cursorRequest = index.openCursor(keyRange);
+        index.openCursor(keyRange);
+        var cursorRequest = pm.couchsave.urlrequestsall();
         var historyRequests = [];
 
-        cursorRequest.onsuccess = function (e) {
-            var result = e.target.result;
-
-            if (!result) {
+        cursorRequest.then(function (e) {
+            var results = e;
+            if(undefined === results)
+            {
                 callback(historyRequests);
                 return;
             }
 
-            var request = result.value;
-            historyRequests.push(request);
-
-            //This wil call onsuccess again and again until no more request is left
-            result['continue']();
-        };
-
-        cursorRequest.onerror = pm.indexedDB.onerror;
+            results.forEach((val)=>{
+                historyRequests.push(val);    
+            });
+            callback(historyRequests);
+            
+        },
+        (e)=>{
+           console.log(e); 
+        });
     },
 
-    deleteRequest:function (id, callback) {
+    deleteRequest:function (itemid, callback) {
         try {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["requests"], "readwrite");
             var store = trans.objectStore(["requests"]);
 
-            var request = store['delete'](id);
-
-            request.onsuccess = function () {
-                callback(id);
-            };
-
-            request.onerror = function (e) {
+            store['delete'](itemid);
+            var request = pm.couchsave.urlrequestdelete(itemid);    
+            request.then(function () {
+                callback(itemid);
+            },function (e) {
                 console.log(e);
-            };
+            });
         }
         catch (e) {
             console.log(e);
@@ -436,30 +463,34 @@ pm.indexedDB = {
         clearRequest.onsuccess = function (event) {
             callback();
         };
+
+        console.log("Delete history will not work for all the records from couchbase, delete records individually");
     },
 
-    deleteCollectionRequest:function (id, callback) {
+    deleteCollectionRequest:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collection_requests"], "readwrite");
         var store = trans.objectStore(["collection_requests"]);
 
-        var request = store['delete'](id);
-
-        request.onsuccess = function (e) {
-            callback(id);
-        };
-
-        request.onerror = function (e) {
+        store['delete'](itemid);
+        var request = pm.couchsave.urlcollrequestdelete(itemid);
+        request.then(function (e) {
+            callback(itemid);
+        },
+        function (e) {
             console.log(e);
-        };
+        });
     },
 
-    deleteAllCollectionRequests:function (id) {
+    deleteAllCollectionRequests:function (itemid) {
         var db = pm.indexedDB.db;
-        var trans = db.transaction(["collection_requests"], "readwrite");
+        var trans = db.transactio
+
+
+        n(["collection_requests"], "readwrite");
 
         //Get everything in the store
-        var keyRange = IDBKeyRange.only(id);
+        var keyRange = IDBKeyRange.only(itemid);
         var store = trans.objectStore("collection_requests");
 
         var index = store.index("collectionId");
@@ -473,27 +504,34 @@ pm.indexedDB = {
             }
 
             var request = result.value;
-            pm.collections.deleteCollectionRequest(request.id);
+            pm.collections.deleteCollectionRequest(request.itemid);
             result['continue']();
         };
         cursorRequest.onerror = pm.indexedDB.onerror;
+        var requestpro = pm.couchsave.urlcolrequestalldelete(itemid);
+        requestpro.then((e) => {},(e)=>
+        {
+            console.log(e);
+        });
+        //todo:
+        //console.log("Delete collection_requests will not work for all the records from couchbase, delete records individually");
     },
 
-    deleteCollection:function (id, callback) {
+    deleteCollection:function (itemid, callback) {
         var db = pm.indexedDB.db;
         var trans = db.transaction(["collections"], "readwrite");
         var store = trans.objectStore(["collections"]);
 
-        var request = store['delete'](id);
-
-        request.onsuccess = function () {
-            pm.indexedDB.deleteAllCollectionRequests(id);
-            callback(id);
-        };
-
-        request.onerror = function (e) {
+        store['delete'](itemid);
+        var request = pm.couchsave.urlcollectiondelete(itemid);
+        request.then(function (e) {
+            //todo: this is not implemented in couchdb
+            pm.indexedDB.deleteAllCollectionRequests(itemid);
+            callback(itemid);
+        },
+        function (e) {
             console.log(e);
-        };
+        });
     },
 
     environments:{
@@ -501,46 +539,47 @@ pm.indexedDB = {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore("environments");
-            var request = store.put(environment);
-
-            request.onsuccess = function (e) {
+            store.put(environment);
+            var request = pm.couchsave.urlenvironmentget(environment.itemid, environment);
+            request.then(function (e) {
                 callback(environment);
-            };
-
-            request.onerror = function (e) {
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
-        getEnvironment:function (id, callback) {
+        getEnvironment:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore("environments");
 
             //Get everything in the store
-            var cursorRequest = store.get(id);
-
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
+            store.get(itemid);
+            var cursorRequest = pm.couchsave.urlenvironmentget(itemid);
+            cursorRequest.then(function (e) {
+                var result = e;
                 callback(result);
-            };
-            cursorRequest.onerror = pm.indexedDB.onerror;
+            },
+            (e)=>
+            {
+                console.log(e);
+            });
         },
 
-        deleteEnvironment:function (id, callback) {
+        deleteEnvironment:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore(["environments"]);
 
-            var request = store['delete'](id);
-
-            request.onsuccess = function () {
-                callback(id);
-            };
-
-            request.onerror = function (e) {
+            store['delete'](itemid);
+            var request = pm.couchsave.urlenvironmentdelete(itemid);
+            request.then(function () {
+                callback(itemid);
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
         getAllEnvironments:function (callback) {
@@ -555,25 +594,27 @@ pm.indexedDB = {
             //Get everything in the store
             var keyRange = IDBKeyRange.lowerBound(0);
             var index = store.index("timestamp");
-            var cursorRequest = index.openCursor(keyRange);
+            index.openCursor(keyRange);
+            var cursorRequest = pm.couchsave.urlenvironmentsall();
             var environments = [];
 
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
-
-                if (!result) {
+            cursorRequest.then(function (e) {
+                var results = e;
+                if(undefined === results)
+                {
                     callback(environments);
                     return;
                 }
 
-                var request = result.value;
-                environments.push(request);
-
-                //This wil call onsuccess again and again until no more request is left
-                result['continue']();
-            };
-
-            cursorRequest.onerror = pm.indexedDB.onerror;
+                results.forEach((val)=>{
+                    environments.push(val);
+                });
+                    
+                callback(environments);
+            },
+            (e)=>{
+                console.log(e);
+            });
         },
 
         updateEnvironment:function (environment, callback) {
@@ -581,16 +622,15 @@ pm.indexedDB = {
             var trans = db.transaction(["environments"], "readwrite");
             var store = trans.objectStore("environments");
 
-            var boundKeyRange = IDBKeyRange.only(environment.id);
-            var request = store.put(environment);
-
-            request.onsuccess = function (e) {
+            var boundKeyRange = IDBKeyRange.only(environment.itemid);
+            store.put(environment);
+            var request = pm.couchsave.urlenvironmentinsert(environment.itemid)
+            request.then(function (e) {
                 callback(environment);
-            };
-
-            request.onerror = function (e) {
-                console.log(e.value);
-            };
+            },
+            function (e) {
+                console.log(e);
+            });
         }
     },
 
@@ -599,46 +639,47 @@ pm.indexedDB = {
             var db = pm.indexedDB.db;
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore(pm.indexedDB.TABLE_HEADER_PRESETS);
-            var request = store.put(headerPreset);
-
-            request.onsuccess = function (e) {
+            store.put(headerPreset);
+            var request = pm.couchsave.urlheaderpresetinsert(headerPreset.itemid, headerPreset);
+            request.then(function (e) {
                 callback(headerPreset);
-            };
-
-            request.onerror = function (e) {
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
-        getHeaderPreset:function (id, callback) {
+        getHeaderPreset:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore(pm.indexedDB.TABLE_HEADER_PRESETS);
 
             //Get everything in the store
-            var cursorRequest = store.get(id);
-
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
+            store.get(itemid);
+            var cursorRequest = pm.couchsave.urlheaderpresetget(itemid);
+            cursorRequest.then(function (e) {
+                var result = e;
                 callback(result);
-            };
-            cursorRequest.onerror = pm.indexedDB.onerror;
+            },
+            (e)=>
+            {
+                console.log(e);
+            });
         },
 
-        deleteHeaderPreset:function (id, callback) {
+        deleteHeaderPreset:function (itemid, callback) {
             var db = pm.indexedDB.db;
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore([pm.indexedDB.TABLE_HEADER_PRESETS]);
 
-            var request = store['delete'](id);
-
-            request.onsuccess = function () {
-                callback(id);
-            };
-
-            request.onerror = function (e) {
+            store['delete'](itemid);
+            var request = pm.couchsave.urlheaderpresetdelete(itemid);
+            request.then(function () {
+                callback(itemid);
+            },
+            function (e) {
                 console.log(e);
-            };
+            });
         },
 
         getAllHeaderPresets:function (callback) {
@@ -654,25 +695,26 @@ pm.indexedDB = {
             //Get everything in the store
             var keyRange = IDBKeyRange.lowerBound(0);
             var index = store.index("timestamp");
-            var cursorRequest = index.openCursor(keyRange);
+            index.openCursor(keyRange);
+            var cursorRequest = pm.couchsave.urlheaderpresetsall();
             var headerPresets = [];
 
-            cursorRequest.onsuccess = function (e) {
-                var result = e.target.result;
-
-                if (!result) {
+            cursorRequest.then(function (e) {
+                var results = e;
+                if(undefined === results)
+                {
                     callback(headerPresets);
                     return;
                 }
 
-                var request = result.value;
-                headerPresets.push(request);
-
-                //This wil call onsuccess again and again until no more request is left
-                result['continue']();
-            };
-
-            cursorRequest.onerror = pm.indexedDB.onerror;
+                results.forEach((val)=>{
+                    headerPresets.push(val);    
+                });              
+                callback(headerPresets);
+            },
+            (e)=>{
+                 console.log(e);
+            });
         },
 
         updateHeaderPreset:function (headerPreset, callback) {
@@ -680,16 +722,15 @@ pm.indexedDB = {
             var trans = db.transaction([pm.indexedDB.TABLE_HEADER_PRESETS], "readwrite");
             var store = trans.objectStore(pm.indexedDB.TABLE_HEADER_PRESETS);
 
-            var boundKeyRange = IDBKeyRange.only(headerPreset.id);
-            var request = store.put(headerPreset);
-
-            request.onsuccess = function (e) {
+            var boundKeyRange = IDBKeyRange.only(headerPreset.itemid);
+            store.put(headerPreset);
+            var request = pm.couchsave.urlheaderpresetinsert(headerPreset.itemid, headerPreset);
+            request.then(function (e) {
                 callback(headerPreset);
-            };
-
-            request.onerror = function (e) {
-                console.log(e.value);
-            };
+            },
+            function (e) {
+                console.log(e);
+            });
         }
     },
 

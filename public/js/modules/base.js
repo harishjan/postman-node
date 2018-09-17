@@ -18,14 +18,14 @@
  */
 "use strict";
 function Collection() {
-    this.id = "";
+    this.itemid = "";
     this.name = "";
     this.requests = {};
 }
 
 function CollectionRequest() {
     this.collectionId = "";
-    this.id = "";
+    this.itemid = "";
     this.name = "";
     this.description = "";
     this.url = "";
@@ -37,7 +37,7 @@ function CollectionRequest() {
 }
 
 function Request() {
-    this.id = "";
+    this.itemid = "";
     this.name = "";
     this.description = "";
     this.url = "";

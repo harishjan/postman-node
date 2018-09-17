@@ -25,31 +25,31 @@ pm.headerPresets = {
         });
 
         $(".header-presets-actions-submit").on("click", function () {
-            var id = $('#header-presets-editor-id').val();
-            if (id === "0") {
+            var itemid = $('#header-presets-editor-id').val();
+            if (itemid === "0") {
                 pm.headerPresets.addHeaderPreset();
             }
             else {
                 var name = $('#header-presets-editor-name').val();
                 var headers = $("#header-presets-keyvaleditor").keyvalueeditor("getValues");
-                pm.headerPresets.editHeaderPreset(id, name, headers);
+                pm.headerPresets.editHeaderPreset(itemid, name, headers);
             }
 
             pm.headerPresets.showList();
         });
 
         $("#header-presets-list").on("click", ".header-preset-action-edit", function () {
-            var id = $(this).attr("data-id");
-            var preset = pm.headerPresets.getHeaderPreset(id);
+            var itemid = $(this).attr("data-id");
+            var preset = pm.headerPresets.getHeaderPreset(itemid);
             $('#header-presets-editor-name').val(preset.name);
-            $('#header-presets-editor-id').val(preset.id);
+            $('#header-presets-editor-id').val(preset.itemid);
             $('#header-presets-keyvaleditor').keyvalueeditor('reset', preset.headers);
             pm.headerPresets.showEditor();
         });
 
         $("#header-presets-list").on("click", ".header-preset-action-delete", function () {
-            var id = $(this).attr("data-id");
-            pm.headerPresets.deleteHeaderPreset(id);
+            var itemid = $(this).attr("data-id");
+            pm.headerPresets.deleteHeaderPreset(itemid);
         });
     },
 
@@ -81,9 +81,9 @@ pm.headerPresets = {
         $("#header-presets-editor").css("display", "block");
     },
 
-    getHeaderPreset:function (id) {
+    getHeaderPreset:function (itemid) {
         for (var i = 0, count = pm.headerPresets.presets.length; i < count; i++) {
-            if (pm.headerPresets.presets[i].id === id) break;
+            if (pm.headerPresets.presets[i].itemid === itemid) break;
         }
 
         var preset = pm.headerPresets.presets[i];
@@ -93,10 +93,10 @@ pm.headerPresets = {
     addHeaderPreset:function () {
         var name = $("#header-presets-editor-name").val();
         var headers = $("#header-presets-keyvaleditor").keyvalueeditor("getValues");
-        var id = guid();
+        var itemid = guid();
 
         var headerPreset = {
-            "id":id,
+            "itemid":itemid,
             "name":name,
             "headers":headers,
             "timestamp":new Date().getTime()
@@ -107,10 +107,10 @@ pm.headerPresets = {
         });
     },
 
-    editHeaderPreset:function (id, name, headers) {
-        pm.indexedDB.headerPresets.getHeaderPreset(id, function (preset) {
+    editHeaderPreset:function (itemid, name, headers) {
+        pm.indexedDB.headerPresets.getHeaderPreset(itemid, function (preset) {
             var headerPreset = {
-                "id":id,
+                "itemid":itemid,
                 "name":name,
                 "headers":headers,
                 "timestamp":preset.timestamp
@@ -122,8 +122,8 @@ pm.headerPresets = {
         });
     },
 
-    deleteHeaderPreset:function (id) {
-        pm.indexedDB.headerPresets.deleteHeaderPreset(id, function () {
+    deleteHeaderPreset:function (itemid) {
+        pm.indexedDB.headerPresets.deleteHeaderPreset(itemid, function () {
             pm.headerPresets.loadPresets();
         });
     },
@@ -133,7 +133,7 @@ pm.headerPresets = {
         for (var i = 0, count = pm.headerPresets.presets.length; i < count; i++) {
             var preset = pm.headerPresets.presets[i];
             var item = {
-                "id":preset.id,
+                "itemid":preset.itemid,
                 "type":"preset",
                 "label":preset.name,
                 "category":"Header presets"

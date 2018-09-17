@@ -19,36 +19,36 @@ pm.collections = {
         });
 
         $collection_items.on("click", ".sidebar-collection-head-name", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.toggleRequestList(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.toggleRequestList(itemid);
         });
 
         $collection_items.on("click", ".collection-head-actions .label", function () {
-            var id = $(this).parent().parent().parent().attr('data-id');
-            pm.collections.toggleRequestList(id);
+            var itemid = $(this).parent().parent().parent().attr('data-id');
+            pm.collections.toggleRequestList(itemid);
         });
 
         $collection_items.on("click", ".request-actions-load", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.getCollectionRequest(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.getCollectionRequest(itemid);
         });
 
 
         $collection_items.on("click", ".request-actions-delete", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
 
-            pm.indexedDB.getCollectionRequest(id, function (req) {
-                $('#modal-delete-collection-request-yes').attr('data-id', id);
+            pm.indexedDB.getCollectionRequest(itemid, function (req) {
+                $('#modal-delete-collection-request-yes').attr('data-id', itemid);
                 $('#modal-delete-collection-request-name').html(req.name);
                 $('#modal-delete-collection-request').modal('show');
             });            
         });        
 
         $collection_items.on("click", ".request-actions-edit", function () {
-            var id = $(this).attr('data-id');
-            $('#form-edit-collection-request .collection-request-id').val(id);
+            var itemid = $(this).attr('data-id');
+            $('#form-edit-collection-request .collection-request-id').val(itemid);
 
-            pm.indexedDB.getCollectionRequest(id, function (req) {
+            pm.indexedDB.getCollectionRequest(itemid, function (req) {
                 $('#form-edit-collection-request .collection-request-name').val(req.name);
                 $('#form-edit-collection-request .collection-request-description').val(req.description);
                 $('#modal-edit-collection-request').modal('show');
@@ -56,32 +56,32 @@ pm.collections = {
         });
 
         $collection_items.on("click", ".collection-actions-edit", function () {
-            var id = $(this).attr('data-id');
-            pm.indexedDB.getCollection(id, function (collection) {
-                $('#form-edit-collection .collection-id').val(collection.id);
+            var itemid = $(this).attr('data-id');
+            pm.indexedDB.getCollection(itemid, function (collection) {
+                $('#form-edit-collection .collection-id').val(collection.itemid);
                 $('#form-edit-collection .collection-name').val(collection.name);
                 $('#modal-edit-collection').modal('show');
             });            
         });
 
         $collection_items.on("click", ".collection-actions-delete", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
             var name = $(this).attr('data-name');
 
-            pm.indexedDB.getCollection(id, function (collection) {
-                $('#modal-delete-collection-yes').attr('data-id', id);
+            pm.indexedDB.getCollection(itemid, function (collection) {
+                $('#modal-delete-collection-yes').attr('data-id', itemid);
                 $('#modal-delete-collection-name').html(collection.name);
             });            
         });
 
         $('#modal-delete-collection-yes').on("click", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.deleteCollection(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.deleteCollection(itemid);
         });
 
         $('#modal-delete-collection-request-yes').on("click", function () {
-            var id = $(this).attr('data-id');
-            pm.collections.deleteCollectionRequest(id);
+            var itemid = $(this).attr('data-id');
+            pm.collections.deleteCollectionRequest(itemid);
         });
 
         $('#import-collection-url-submit').on("click", function () {
@@ -90,34 +90,34 @@ pm.collections = {
         });
 
         $collection_items.on("click", ".collection-actions-download", function () {
-            var id = $(this).attr('data-id');
+            var itemid = $(this).attr('data-id');
             $("#modal-share-collection").modal("show");
-            $('#share-collection-get-link').attr("data-collection-id", id);
-            $('#share-collection-download').attr("data-collection-id", id);
+            $('#share-collection-get-link').attr("data-collection-id", itemid);
+            $('#share-collection-download').attr("data-collection-id", itemid);
             $('#share-collection-link').css("display", "none");
         });
 
         $('#share-collection-get-link').on("click", function () {
-            var id = $(this).attr('data-collection-id');
-            pm.collections.uploadCollection(id, function (link) {
+            var itemid = $(this).attr('data-collection-id');
+            pm.collections.uploadCollection(itemid, function (link) {
                 $('#share-collection-link').css("display", "block");
                 $('#share-collection-link').html(link);
             });
         });
 
         $('#share-collection-download').on("click", function () {
-            var id = $(this).attr('data-collection-id');
-            pm.collections.saveCollection(id);
+            var itemid = $(this).attr('data-collection-id');
+            pm.collections.saveCollection(itemid);
         });
 
         $('#request-samples').on("click", ".sample-response-name", function () {
-            var id = $(this).attr("data-id");
-            pm.collections.loadResponseInEditor(id);
+            var itemid = $(this).attr("data-id");
+            pm.collections.loadResponseInEditor(itemid);
         });
 
         $('#request-samples').on("click", ".sample-response-delete", function () {
-            var id = $(this).attr("data-id");
-            pm.collections.removeSampleResponse(id);
+            var itemid = $(this).attr("data-id");
+            pm.collections.removeSampleResponse(itemid);
         });
 
         var dropZone = document.getElementById('import-collection-dropzone');
@@ -142,13 +142,13 @@ pm.collections = {
         });
     },
 
-    getCollectionData:function (id, callback) {
-        pm.indexedDB.getCollection(id, function (data) {
+    getCollectionData:function (itemid, callback) {
+        pm.indexedDB.getCollection(itemid, function (data) {
             var collection = data;
             pm.indexedDB.getAllRequestsInCollection(collection, function (collection, data) {
                 var ids = [];
                 for (var i = 0, count = data.length; i < count; i++) {
-                    ids.push(data[i].id);
+                    ids.push(data[i].itemid);
                 }
 
                 //Get all collection requests with one call
@@ -161,15 +161,15 @@ pm.collections = {
         });
     },
 
-    saveCollection:function (id) {
-        pm.collections.getCollectionData(id, function (name, type, filedata) {
+    saveCollection:function (itemid) {
+        pm.collections.getCollectionData(itemid, function (name, type, filedata) {
             pm.filesystem.saveAndOpenFile(name, filedata, type, function () {
             });
         });
     },
 
-    uploadCollection:function (id, callback) {
-        pm.collections.getCollectionData(id, function (name, type, filedata) {
+    uploadCollection:function (itemid, callback) {
+        pm.collections.getCollectionData(itemid, function (name, type, filedata) {
             var uploadUrl = pm.webUrl + '/collections';
             $.ajax({
                 type:'POST',
@@ -202,7 +202,7 @@ pm.collections = {
 
             for (var i = 0; i < collection.requests.length; i++) {
                 var request = collection.requests[i];
-                request.collectionId = collection.id;
+                request.collectionId = collection.itemid;
 
                   /*Handling rawModeData */
                 if(request.hasOwnProperty("rawModeData")) {
@@ -213,17 +213,17 @@ pm.collections = {
                 var newId = guid();
 
                 if (ordered) {
-                    var currentId = request.id;
+                    var currentId = request.itemid;
                     var loc = _.indexOf(collection["order"], currentId);
                     collection["order"][loc] = newId;
                 }
 
-                request.id = newId;
+                request.itemid = newId;
 
                 if ("responses" in request) {
                     var j, count;
                     for (j = 0, count = request["responses"].length; j < count; j++) {
-                        request["responses"][j].id = guid();
+                        request["responses"][j].itemid = guid();
                         request["responses"][j].collectionRequestId = newId;                        
                     }
                 }
@@ -250,7 +250,7 @@ pm.collections = {
                     // Render thumbnail.
                     var data = e.currentTarget.result;
                     var collection = JSON.parse(data);
-                    collection.id = guid();
+                    collection.itemid = guid();
                     pm.collections.importCollectionData(collection);
                 };
             })(f);
@@ -263,25 +263,25 @@ pm.collections = {
     importCollectionFromUrl:function (url) {
         $.get(url, function (data) {
             var collection = data;
-            collection.id = guid();
+            collection.itemid = guid();
             pm.collections.importCollectionData(collection);
         });
     },
 
-    getCollectionRequest:function (id) {
+    getCollectionRequest:function (itemid) {
         $('.sidebar-collection-request').removeClass('sidebar-collection-request-active');
-        $('#sidebar-request-' + id).addClass('sidebar-collection-request-active');
-        pm.indexedDB.getCollectionRequest(id, function (request) {
+        $('#sidebar-request-' + itemid).addClass('sidebar-collection-request-active');
+        pm.indexedDB.getCollectionRequest(itemid, function (request) {
             pm.request.isFromCollection = true;
-            pm.request.collectionRequestId = id;
+            pm.request.collectionRequestId = itemid;
             pm.request.loadRequestInEditor(request, true);
         });
     },
 
-    loadResponseInEditor:function (id) {
+    loadResponseInEditor:function (itemid) {
         var responses = pm.request.responses;        
         var responseIndex = find(responses, function (item, i, responses) {
-            return item.id === id;
+            return item.itemid === itemid;
         });
 
         var response = responses[responseIndex];
@@ -289,10 +289,10 @@ pm.collections = {
         pm.request.response.render(response);
     },
 
-    removeSampleResponse:function (id) {
+    removeSampleResponse:function (itemid) {
         var responses = pm.request.responses;
         var responseIndex = find(responses, function (item, i, responses) {
-            return item.id === id;
+            return item.itemid === itemid;
         });
 
         var response = responses[responseIndex];
@@ -301,14 +301,14 @@ pm.collections = {
         pm.indexedDB.getCollectionRequest(response.collectionRequestId, function (request) {
             request["responses"] = responses;
             pm.indexedDB.updateCollectionRequest(request, function () {
-                $('#request-samples table tr[data-id="' + response.id + '"]').remove();
+                $('#request-samples table tr[data-id="' + response.itemid + '"]').remove();
             });
 
         });
     },
 
-    openCollection:function (id) {
-        var target = "#collection-requests-" + id;
+    openCollection:function (itemid) {
+        var target = "#collection-requests-" + itemid;
         if ($(target).css("display") === "none") {
             $(target).slideDown(100, function () {
                 pm.layout.refreshScrollPanes();
@@ -316,9 +316,9 @@ pm.collections = {
         }
     },
 
-    toggleRequestList:function (id) {
-        var target = "#collection-requests-" + id;
-        var label = "#collection-" + id + " .collection-head-actions .label";
+    toggleRequestList:function (itemid) {
+        var target = "#collection-requests-" + itemid;
+        var label = "#collection-" + itemid + " .collection-head-actions .label";
         if ($(target).css("display") === "none") {
             $(target).slideDown(100, function () {
                 pm.layout.refreshScrollPanes();
@@ -338,7 +338,7 @@ pm.collections = {
 
         if (newCollection) {
             //Add the new collection and get guid
-            collection.id = guid();
+            collection.itemid = guid();
             collection.name = newCollection;
             pm.indexedDB.addCollection(collection, function (collection) {
                 pm.collections.render(collection);
@@ -353,7 +353,7 @@ pm.collections = {
     updateCollectionFromCurrentRequest:function () {
         var url = $('#url').val();
         var collectionRequest = new CollectionRequest();
-        collectionRequest.id = pm.request.collectionRequestId;
+        collectionRequest.itemid = pm.request.collectionRequestId;
         collectionRequest.headers = pm.request.getPackedHeaders();
         collectionRequest.url = url;
         collectionRequest.method = pm.request.method;
@@ -362,11 +362,11 @@ pm.collections = {
         collectionRequest.version = 2;
         collectionRequest.time = new Date().getTime();
 
-        pm.indexedDB.getCollectionRequest(collectionRequest.id, function (req) {
+        pm.indexedDB.getCollectionRequest(collectionRequest.itemid, function (req) {
             collectionRequest.name = req.name;
             collectionRequest.description = req.description;
             collectionRequest.collectionId = req.collectionId;
-            $('#sidebar-request-' + req.id + " .request .label").removeClass('label-method-' + req.method);
+            $('#sidebar-request-' + req.itemid + " .request .label").removeClass('label-method-' + req.method);
 
             pm.indexedDB.updateCollectionRequest(collectionRequest, function (request) {
                 var requestName;
@@ -376,9 +376,9 @@ pm.collections = {
 
                 requestName = limitStringLineWidth(request.name, 43);
 
-                $('#sidebar-request-' + request.id + " .request .request-name").html(requestName);
-                $('#sidebar-request-' + request.id + " .request .label").html(request.method);
-                $('#sidebar-request-' + request.id + " .request .label").addClass('label-method-' + request.method);
+                $('#sidebar-request-' + request.itemid + " .request .request-name").html(requestName);
+                $('#sidebar-request-' + request.itemid + " .request .label").html(request.method);
+                $('#sidebar-request-' + request.itemid + " .request .label").addClass('label-method-' + request.method);
                 noty(
                     {
                         type:'success',
@@ -407,7 +407,7 @@ pm.collections = {
         var collection = new Collection();
 
         var collectionRequest = new CollectionRequest();
-        collectionRequest.id = guid();
+        collectionRequest.itemid = guid();
         collectionRequest.headers = pm.request.getPackedHeaders();
         collectionRequest.url = url;
         collectionRequest.method = pm.request.method;
@@ -421,12 +421,12 @@ pm.collections = {
 
         if (newCollection) {
             //Add the new collection and get guid
-            collection.id = guid();
+            collection.itemid = guid();
             collection.name = newCollection;
             pm.indexedDB.addCollection(collection, function (collection) {
                 $('#sidebar-section-collections .empty-message').css("display", "none");
                 $('#new-collection').val("");
-                collectionRequest.collectionId = collection.id;
+                collectionRequest.collectionId = collection.itemid;
 
                 $('#select-collection').append(Handlebars.templates.item_collection_selector_list(collection));
                 $('#collection-items').append(Handlebars.templates.item_collection_sidebar_head(collection));
@@ -435,7 +435,7 @@ pm.collections = {
                 pm.layout.refreshScrollPanes();
                 pm.indexedDB.addCollectionRequest(collectionRequest, function (req) {
                     var targetElement = "#collection-requests-" + req.collectionId;
-                    $('#sidebar-request-' + req.id).addClass('sidebar-collection-request-active');
+                    $('#sidebar-request-' + req.itemid).addClass('sidebar-collection-request-active');
                     pm.urlCache.addUrl(req.url);
 
                     if (typeof req.name === "undefined") {
@@ -448,7 +448,7 @@ pm.collections = {
                     pm.layout.refreshScrollPanes();
 
                     pm.request.isFromCollection = true;
-                    pm.request.collectionRequestId = collectionRequest.id;
+                    pm.request.collectionRequestId = collectionRequest.itemid;
                     $('#update-request-in-collection').css("display", "inline-block");
                     pm.collections.openCollection(collectionRequest.collectionId);
                 });
@@ -456,8 +456,8 @@ pm.collections = {
         }
         else {
             //Get guid of existing collection
-            collection.id = existingCollectionId;
-            collectionRequest.collectionId = collection.id;
+            collection.itemid = existingCollectionId;
+            collectionRequest.collectionId = collection.itemid;
             pm.indexedDB.addCollectionRequest(collectionRequest, function (req) {
                 var targetElement = "#collection-requests-" + req.collectionId;
                 pm.urlCache.addUrl(req.url);
@@ -468,19 +468,19 @@ pm.collections = {
                 req.name = limitStringLineWidth(req.name, 43);
 
                 $(targetElement).append(Handlebars.templates.item_collection_sidebar_request(req));
-                $('#sidebar-request-' + req.id).addClass('sidebar-collection-request-active');
+                $('#sidebar-request-' + req.itemid).addClass('sidebar-collection-request-active');
 
                 pm.layout.refreshScrollPanes();
 
                 pm.request.isFromCollection = true;
-                pm.request.collectionRequestId = collectionRequest.id;
+                pm.request.collectionRequestId = collectionRequest.itemid;
                 $('#update-request-in-collection').css("display", "inline-block");
                 pm.collections.openCollection(collectionRequest.collectionId);
 
                 //Update collection's order element    
-                pm.indexedDB.getCollection(collection.id, function(collection) {
+                pm.indexedDB.getCollection(collection.itemid, function(collection) {
                     if("order" in collection) {
-                        collection["order"].push(collectionRequest.id);
+                        collection["order"].push(collectionRequest.itemid);
                         pm.indexedDB.updateCollection(collection, function() {});
                     }
                 });
@@ -526,8 +526,8 @@ pm.collections = {
     },
 
     handleRequestDropOnCollection: function(event, ui) {
-        var id = ui.draggable.context.id;
-        var requestId = $('#' + id + ' .request').attr("data-id");
+        var itemid = ui.draggable.context.itemid;
+        var requestId = $('#' + itemid + ' .request').attr("data-id");
         var targetCollectionId = $($(event.target).find('.sidebar-collection-head-name')[0]).attr('data-id');      
         pm.indexedDB.getCollection(targetCollectionId, function(collection) {            
             pm.indexedDB.getCollectionRequest(requestId, function(collectionRequest) {
@@ -535,7 +535,7 @@ pm.collections = {
 
                 pm.collections.deleteCollectionRequest(requestId);
 
-                collectionRequest.id = guid();
+                collectionRequest.itemid = guid();
                 collectionRequest.collectionId = targetCollectionId;            
 
                 pm.indexedDB.addCollectionRequest(collectionRequest, function (req) {                        
@@ -561,9 +561,9 @@ pm.collections = {
                     });
 
                     //Update collection's order element    
-                    pm.indexedDB.getCollection(collection.id, function(collection) {                        
+                    pm.indexedDB.getCollection(collection.itemid, function(collection) {                        
                         if("order" in collection) {                                                
-                            collection["order"].push(collectionRequest.id);                                                        
+                            collection["order"].push(collectionRequest.itemid);                                                        
                             pm.indexedDB.updateCollection(collection, function() {                                
                             });
                         }
@@ -576,7 +576,7 @@ pm.collections = {
     render:function (collection) {
         $('#sidebar-section-collections .empty-message').css("display", "none");
 
-        var currentEl = $('#collection-' + collection.id);
+        var currentEl = $('#collection-' + collection.itemid);
         if (currentEl) {
             currentEl.remove();
         }
@@ -586,16 +586,16 @@ pm.collections = {
 
         $('a[rel="tooltip"]').tooltip();
 
-        $('#collection-' + collection.id + " .sidebar-collection-head").droppable({
+        $('#collection-' + collection.itemid + " .sidebar-collection-head").droppable({
             accept: ".sidebar-collection-request",
             hoverClass: "ui-state-hover",
             drop: pm.collections.handleRequestDropOnCollection
         });
 
         if ("requests" in collection) {
-            var id = collection.id;
+            var itemid = collection.itemid;
             var requests = collection.requests;
-            var targetElement = "#collection-requests-" + id;
+            var targetElement = "#collection-requests-" + itemid;
             var count = requests.length;
             var requestTargetElement;
 
@@ -609,7 +609,7 @@ pm.collections = {
 
                     
                     //Make requests draggable for moving to a different collection
-                    requestTargetElement = "#sidebar-request-" + requests[i].id;                    
+                    requestTargetElement = "#sidebar-request-" + requests[i].itemid;                    
                     $(requestTargetElement).draggable({});
                 }
 
@@ -622,7 +622,7 @@ pm.collections = {
                         var orderedRequests = [];                    
                         for (var j = 0, len = collection["order"].length; j < len; j++) {
                             var element = _.find(requests, function (request) {
-                                return request.id == collection["order"][j]
+                                return request.itemid == collection["order"][j]
                             });
                             orderedRequests.push(element);
                         }
@@ -639,13 +639,13 @@ pm.collections = {
                         var target_parent = $(event.target).parents(".sidebar-collection-requests");                        
                         var target_parent_collection = $(event.target).parents(".sidebar-collection");                        
                         var collection_id = $(target_parent_collection).attr("data-id");
-                        var ul_id = $(target_parent.context).attr("id");                        
+                        var ul_id = $(target_parent.context).attr("itemid");                        
                         var collection_requests = $(target_parent.context).children("li");
                         var count = collection_requests.length;
                         var order = [];
 
                         for (var i = 0; i < count; i++) {
-                            var li_id = $(collection_requests[i]).attr("id");
+                            var li_id = $(collection_requests[i]).attr("itemid");
                             var request_id = $("#" + li_id + " .request").attr("data-id");
                             order.push(request_id);
                         }
@@ -664,14 +664,14 @@ pm.collections = {
         pm.layout.refreshScrollPanes();
     },
 
-    deleteCollectionRequest:function (id) {
-        pm.indexedDB.getCollectionRequest(id, function(request) {
-            pm.indexedDB.deleteCollectionRequest(id, function () {
-                pm.layout.sidebar.removeRequestFromHistory(id);
+    deleteCollectionRequest:function (itemid) {
+        pm.indexedDB.getCollectionRequest(itemid, function(request) {
+            pm.indexedDB.deleteCollectionRequest(itemid, function () {
+                pm.layout.sidebar.removeRequestFromHistory(itemid);
                 //Update order
                 pm.indexedDB.getCollection(request.collectionId, function (collection) {                            
                     var order = collection["order"];
-                    var index = order.indexOf(id);
+                    var index = order.indexOf(itemid);
                     order.splice(index, 1);
                     collection["order"] = order;
                     pm.indexedDB.updateCollection(collection, function (collection) {                        
@@ -681,18 +681,18 @@ pm.collections = {
         });        
     },
 
-    updateCollectionMeta: function(id, name) {
-        pm.indexedDB.getCollection(id, function (collection) {
+    updateCollectionMeta: function(itemid, name) {
+        pm.indexedDB.getCollection(itemid, function (collection) {
             collection.name = name;
             pm.indexedDB.updateCollection(collection, function (collection) {                    
-                $('#collection-' + collection.id + " .sidebar-collection-head-name").html(collection.name);
-                $('#select-collection option[value="' + collection.id + '"]').html(collection.name);                
+                $('#collection-' + collection.itemid + " .sidebar-collection-head-name").html(collection.name);
+                $('#select-collection option[value="' + collection.itemid + '"]').html(collection.name);                
             });
         });        
     },
 
-    updateCollectionRequestMeta: function(id, name, description) {
-        pm.indexedDB.getCollectionRequest(id, function (req) {
+    updateCollectionRequestMeta: function(itemid, name, description) {
+        pm.indexedDB.getCollectionRequest(itemid, function (req) {
             req.name = name;
             req.description = description;
             pm.indexedDB.updateCollectionRequest(req, function (newRequest) {
@@ -704,8 +704,8 @@ pm.collections = {
                     requestName = limitStringLineWidth(req.url, 43);
                 }
 
-                $('#sidebar-request-' + req.id + " .request .request-name").html(requestName);
-                if (pm.request.collectionRequestId === req.id) {
+                $('#sidebar-request-' + req.itemid + " .request .request-name").html(requestName);
+                if (pm.request.collectionRequestId === req.itemid) {
                     $('#request-name').html(req.name);
                     $('#request-description').html(req.description);
                 }
@@ -714,11 +714,11 @@ pm.collections = {
         });
     },
 
-    deleteCollection:function (id) {
-        pm.indexedDB.deleteCollection(id, function () {
-            pm.layout.sidebar.removeCollection(id);
+    deleteCollection:function (itemid) {
+        pm.indexedDB.deleteCollection(itemid, function () {
+            pm.layout.sidebar.removeCollection(itemid);
 
-            var target = '#select-collection option[value="' + id + '"]';
+            var target = '#select-collection option[value="' + itemid + '"]';
             $(target).remove();
         });
     },

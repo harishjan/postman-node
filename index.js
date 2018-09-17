@@ -2,8 +2,9 @@ var express = require('express');
 var request = require('request');
 var url = require('url');
 var compression = require('compression');
+var bodyParser = require('body-parser');
 
-var port = (process.env.VCAP_APP_PORT || 3000);
+var port = (process.env.VCAP_APP_PORT || 3001);
 
 var app = express();
 app.use(compression());
@@ -51,6 +52,17 @@ app.all('/api/request', function(req, res) {
         res.status(resp.statusCode).send(body);
     });
 
+});
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+var routes = require('./api/routes/postmanroutes'); //importing route
+routes(app); //register the route
+
+
+app.use(function(req, res) {
+  res.status(404).send({url: req.originalUrl + ' not found'})
 });
 
 app.listen(port);

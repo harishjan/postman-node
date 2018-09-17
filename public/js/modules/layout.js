@@ -155,7 +155,7 @@ pm.layout = {
 
             var currentResponse = pm.request.response;
             var request = new CollectionRequest();
-            request.id = guid();
+            request.itemid = guid();
             request.headers = pm.request.getPackedHeaders();
             request.url = url;
             request.method = pm.request.method;
@@ -166,7 +166,7 @@ pm.layout = {
             var name = $("#response-sample-name").val();
 
             var response = {
-                "id":guid(),
+                "itemid":guid(),
                 "name":name,
                 "collectionRequestId":pm.request.collectionRequestId,
                 "request":request,
@@ -188,8 +188,8 @@ pm.layout = {
         pm.request.response.clear();
 
         $('#sidebar-selectors li a').click(function () {
-            var id = $(this).attr('data-id');
-            pm.layout.sidebar.select(id);
+            var itemid = $(this).attr('data-id');
+            pm.layout.sidebar.select(itemid);
         });
 
         $('a[rel="tooltip"]').tooltip();
@@ -212,18 +212,18 @@ pm.layout = {
         });
 
         $('#form-edit-collection').submit(function() {
-            var id = $('#form-edit-collection .collection-id').val();
+            var itemid = $('#form-edit-collection .collection-id').val();
             var name = $('#form-edit-collection .collection-name').val();
-            pm.collections.updateCollection(id, name);
+            pm.collections.updateCollection(itemid, name);
             $('#modal-edit-collection').modal('hide');
             return false;
         });
 
         $('#form-edit-collection-request').submit(function() {
-            var id = $('#form-edit-collection-request .collection-request-id').val();
+            var itemid = $('#form-edit-collection-request .collection-request-id').val();
             var name = $('#form-edit-collection-request .collection-request-name').val();
             var description = $('#form-edit-collection-request .collection-request-description').val();
-            pm.collections.updateCollectionRequestMeta(id, name, description);
+            pm.collections.updateCollectionRequestMeta(itemid, name, description);
             return false;
         });
 
@@ -233,18 +233,18 @@ pm.layout = {
         });
 
         $('#modal-edit-collection .btn-primary').click(function () {
-            var id = $('#form-edit-collection .collection-id').val();
+            var itemid = $('#form-edit-collection .collection-id').val();
             var name = $('#form-edit-collection .collection-name').val();
 
-            pm.collections.updateCollectionMeta(id, name);
+            pm.collections.updateCollectionMeta(itemid, name);
             $('#modal-edit-collection').modal('hide');
         });
 
         $('#modal-edit-collection-request .btn-primary').click(function () {
-            var id = $('#form-edit-collection-request .collection-request-id').val();
+            var itemid = $('#form-edit-collection-request .collection-request-id').val();
             var name = $('#form-edit-collection-request .collection-request-name').val();
             var description = $('#form-edit-collection-request .collection-request-description').val();
-            pm.collections.updateCollectionRequestMeta(id, name, description);
+            pm.collections.updateCollectionRequestMeta(itemid, name, description);
         });
 
         $(window).resize(function () {
@@ -533,7 +533,7 @@ pm.layout = {
             return true;
         },
 
-        addRequest:function (url, method, id, position) {
+        addRequest:function (url, method, itemid, position) {
             if (url.length > 80) {
                 url = url.substring(0, 80) + "...";
             }
@@ -542,7 +542,7 @@ pm.layout = {
             var request = {
                 url:url,
                 method:method,
-                id:id,
+                itemid:itemid,
                 position:position
             };
 
@@ -569,16 +569,16 @@ pm.layout = {
             });
         },
 
-        emptyCollectionInSidebar:function (id) {
-            $('#collection-requests-' + id).html("");
+        emptyCollectionInSidebar:function (itemid) {
+            $('#collection-requests-' + itemid).html("");
         },
 
-        removeRequestFromHistory:function (id, toAnimate) {
+        removeRequestFromHistory:function (itemid, toAnimate) {
             if (toAnimate) {
-                $('#sidebar-request-' + id).slideUp(100);
+                $('#sidebar-request-' + itemid).slideUp(100);
             }
             else {
-                $('#sidebar-request-' + id).remove();
+                $('#sidebar-request-' + itemid).remove();
             }
 
             if (pm.history.requests.length === 0) {
@@ -591,8 +591,8 @@ pm.layout = {
             pm.layout.refreshScrollPanes();
         },
 
-        removeCollection:function (id) {
-            $('#collection-' + id).remove();
+        removeCollection:function (itemid) {
+            $('#collection-' + itemid).remove();
             pm.layout.refreshScrollPanes();
         }
     }

@@ -73,7 +73,7 @@ pm.history = {
                     var request = {
                         url:url,
                         method:historyRequests[i].method,
-                        id:historyRequests[i].id,
+                        itemid:historyRequests[i].itemid,
                         position:"top"
                     };
 
@@ -92,8 +92,8 @@ pm.history = {
 
     },
 
-    loadRequest:function (id) {
-        pm.indexedDB.getRequest(id, function (request) {
+    loadRequest:function (itemid) {
+        pm.indexedDB.getRequest(itemid, function (request) {
             pm.request.isFromCollection = false;
             $('.sidebar-collection-request').removeClass('sidebar-collection-request-active');
             pm.request.loadRequestInEditor(request);
@@ -101,7 +101,7 @@ pm.history = {
     },
 
     addRequest:function (url, method, headers, data, dataMode) {        
-        var id = guid();
+        var itemid = guid();
         var maxHistoryCount = pm.settings.get("historyCount");
         var requests = this.requests;
         var requestsCount = this.requests.length;
@@ -110,12 +110,12 @@ pm.history = {
             if (requestsCount >= maxHistoryCount) {
                 //Delete the last request
                 var lastRequest = requests[0];
-                this.deleteRequest(lastRequest.id);
+                this.deleteRequest(lastRequest.itemid);
             }    
         }        
 
         var historyRequest = {
-            "id":id,
+            "itemid":itemid,
             "url":url.toString(),
             "method":method.toString(),
             "headers":headers.toString(),
@@ -128,25 +128,25 @@ pm.history = {
         var index = this.requestExists(historyRequest);
 
         if (index >= 0) {
-            var deletedId = requests[index].id;
+            var deletedId = requests[index].itemid;
             this.deleteRequest(deletedId);
         }
 
         pm.indexedDB.addRequest(historyRequest, function (request) {
             pm.urlCache.addUrl(request.url);
-            pm.layout.sidebar.addRequest(request.url, request.method, id, "top");
+            pm.layout.sidebar.addRequest(request.url, request.method, itemid, "top");
             pm.history.requests.push(request);
         });
     },
 
 
-    deleteRequest:function (id) {
-        pm.indexedDB.deleteRequest(id, function (request_id) {
+    deleteRequest:function (itemid) {
+        pm.indexedDB.deleteRequest(itemid, function (request_id) {
             var historyRequests = pm.history.requests;
             var k = -1;
             var len = historyRequests.length;
             for (var i = 0; i < len; i++) {
-                if (historyRequests[i].id === request_id) {
+                if (historyRequests[i].itemid === request_id) {
                     k = i;
                     break;
                 }
